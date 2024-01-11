@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  binding_tests:
+    name: ${{ matrix.os }} / Python${{ matrix.py }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        py: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.py }}
+
+    - name: Install Python Requirements
+      run: |
+        python -m pip install --user --upgrade -r python/requirements.txt
+        python -m pip install --user --upgrade -r python/tests/requirements.txt
+
+    - name: Install Package
+      run: |
+        python -m pip install --user --upgrade .
+
+    - name: Run Tests
+      run: |
+        python -m pytest -vv python/tests

@@ -1,3 +1,4 @@
-data
+build/
+.vscode/
+.pytest_cache/
 src/inc/tlsh_version.h
-build
