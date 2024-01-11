@@ -671,19 +671,12 @@ thread2()
 void
 TlshImpl::fast_update5(const unsigned char *data, unsigned int len, int tlsh_option)
 {
-<<<<<<< HEAD
 #ifdef THREADING_IMPLEMENTED
     if ((len >= 10000) && (tlsh_option & TLSH_OPTION_THREADED))
     {
         unsigned len2A = len / 2;
         unsigned len2B = len - len2A;
         // printf("method 2	len=%d	len2A=%d	len2B=%d\n", len, len2A, len2B);
-=======
-	if ((len >= 10000) && (tlsh_option & TLSH_OPTION_THREADED)) {
-		unsigned len2A = len / 2;
-		unsigned len2B = len - len2A;
-		// printf("method 2	len=%d	len2A=%d	len2B=%d\n", len, len2A, len2B);
->>>>>>> parent of 74efd09 (**4.11.2**)
 
         for (int bi = 0; bi < 256; bi++)
         {
@@ -713,7 +706,6 @@ TlshImpl::fast_update5(const unsigned char *data, unsigned int len, int tlsh_opt
 
         this->data_len += len;
 
-<<<<<<< HEAD
         for (int bi = 0; bi < 128; bi++)
         {
             this->a_bucket[bi] += (call1.bucket[bi] + call2.bucket[bi]);
@@ -734,22 +726,6 @@ TlshImpl::fast_update5(const unsigned char *data, unsigned int len, int tlsh_opt
             this->slide_window);
         this->data_len += len;
     }
-=======
-		for (int bi=0; bi<128; bi++) {
-			this->a_bucket[bi] += (call1.bucket[bi] + call2.bucket[bi]) ;
-			// printf("bucket	%d	=%d\n", bi, this->a_bucket[bi] );
-		}
-		return;
-	}
-	if (tlsh_option & TLSH_OPTION_PRIVATE) {
-		raw_fast_update5_private(data, len, this->data_len, this->a_bucket,                               this->slide_window);
-		this->data_len += len;
-		this->lsh_bin.checksum[0] = 0;
-	} else {
-		raw_fast_update5        (data, len, this->data_len, this->a_bucket, &(this->lsh_bin.checksum[0]), this->slide_window);
-		this->data_len += len;
-	}
->>>>>>> parent of 74efd09 (**4.11.2**)
 }
 
 static void

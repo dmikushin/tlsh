@@ -5,19 +5,11 @@
  * Beware - do not change these values unless you really understand the software.
  ****************************************************/
 
-<<<<<<< HEAD:src/inc/tlsh_win_version.h
 // #define VERSION_MAJOR		4
 // #define VERSION_MINOR		11
 // #define VERSION_PATCH		2
 // #define TLSH_HASH		"compact hash"
 // #define TLSH_CHECKSUM		"1 byte checksum"
-=======
-#define VERSION_MAJOR		4
-#define VERSION_MINOR		11
-#define VERSION_PATCH		1
-#define TLSH_HASH		"compact hash"
-#define TLSH_CHECKSUM		"1 byte checksum"
->>>>>>> parent of 74efd09 (**4.11.2**):include/tlsh_win_version.h
 
 #define buckets 128
 #define TLSH_CHECKSUM_LEN 1

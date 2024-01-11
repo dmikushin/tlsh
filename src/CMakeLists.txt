@@ -19,39 +19,10 @@ if(WIN32)
     )
 endif()
 
-<<<<<<< HEAD
 if(TLSH_BUILD_STATIC)
-add_library(tlsh STATIC)
-=======
-set(TLSH_SRCS tlsh.cpp tlsh_impl.cpp tlsh_util.cpp input_desc.cpp shared_file_functions.cpp)
-add_library(tlsh_static STATIC ${TLSH_SRCS})
-target_link_libraries(tlsh_static PRIVATE Threads::Threads)
-set_target_properties(tlsh_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-set_target_properties(tlsh_static PROPERTIES OUTPUT_NAME tlsh${BUILD_POSTFIX})
-
-##########################
-# the tlsh library is small - there is no reason to have a shared library
-# it was causing problems when compiling / testing tools on Linux
-##########################
-
-if (NOT DEFINED TLSH_SHARED_LIBRARY)
-    set(TLSH_SHARED_LIBRARY 0)
-endif()
-
-if(TLSH_SHARED_LIBRARY EQUAL 1)
-    add_library(tlsh_shared SHARED ${TLSH_SRCS})
-    target_link_libraries(tlsh_shared PRIVATE Threads::Threads)
-    set_target_properties(tlsh_shared PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-    set_target_properties(tlsh_shared PROPERTIES OUTPUT_NAME tlsh${BUILD_POSTFIX})
-    set_target_properties(tlsh_shared PROPERTIES VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
-                                                 SOVERSION "${VERSION_MAJOR}")
-endif()
-
-if(TLSH_SHARED_LIBRARY)
-    install(TARGETS tlsh_static tlsh_shared DESTINATION lib)
->>>>>>> parent of 74efd09 (**4.11.2**)
+    add_library(tlsh STATIC)
 else()
-add_library(tlsh SHARED)
+    add_library(tlsh SHARED)
 endif()
 
 

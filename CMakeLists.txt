@@ -15,14 +15,8 @@ set(CXX_STANDARD 20)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-<<<<<<< HEAD
 option(TLSH_BUILD_STATIC "Build as static library instead of shared library" ON)
 option(TLSH_BUILD_BINDINGS "Build Python bindings" ON)
-=======
-set(VERSION_MAJOR 4)
-set(VERSION_MINOR 11)
-set(VERSION_PATCH 1)
->>>>>>> parent of 74efd09 (**4.11.2**)
 
 # # TLSH uses only half the counting buckets.
 # # It can use all the buckets now.
@@ -104,18 +98,11 @@ set(TLSH_DISTANCE_PARAMETERS 0)
 # endif()
 
 # user can override CXX; make sure tests link and load properly regardless of LD_LIBRARY_PATH
-<<<<<<< HEAD
 # if(CMAKE_COMPILER_IS_GNUCXX)
 #     # issue #116 Library will not compile on CENTOS 7
 #     # set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
 #     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc")
 # endif()
-=======
-if(CMAKE_COMPILER_IS_GNUCXX)
-    # previously used:    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc")
-    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
-endif()
->>>>>>> parent of 74efd09 (**4.11.2**)
 
 # # from https://stackoverflow.com/questions/5395309/how-do-i-force-cmake-to-include-pthread-option-during-compilation
 # set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
