@@ -1,0 +1,163 @@
+name: CI
+
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  libtlsh:
+    name: "${{ matrix.variants.os }}/${{ matrix.variants.arch }}/${{ matrix.variants.config }}/STATIC=${{ matrix.static }}"
+    env:
+      CMAKE_FLAGS: "-D TLSH_BUILD_BINDINGS:BOOL=OFF"
+      NB_CPU: 1
+      VERBOSE: 1
+    strategy:
+      fail-fast: false
+      matrix:
+        variants:
+          - {os: windows-latest,   arch: x64,      config: RelWithDebInfo}
+          - {os: windows-latest,   arch: win32,    config: RelWithDebInfo}
+          - {os: windows-latest,   arch: arm64,    config: RelWithDebInfo}
+          - {os: windows-latest,   arch: arm,      config: RelWithDebInfo}
+          - {os: ubuntu-latest,    arch: x64,      config: RelWithDebInfo}
+          - {os: macos-latest,     arch: x64,      config: Release}
+        static: ["OFF", "ON"]
+
+    runs-on: ${{ matrix.variants.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup environment variables (Windows)
+      if: matrix.variants.os == 'windows-latest'
+      shell: powershell
+      run: |
+        echo "NB_CPU=$env:NUMBER_OF_PROCESSORS" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        Import-Module .\.github\Invoke-VisualStudio.ps1
+        Invoke-VisualStudio2022${{ matrix.variants.arch }}
+
+    - name: Setup environment variables (Linux)
+      if: matrix.variants.os == 'ubuntu-latest'
+      run: |
+        sudo apt remove llvm-* clang-* python3-lldb-* libunwind-* libc++abi1-* libc++1-*
+        wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+        chmod +x /tmp/llvm.sh
+        sudo /tmp/llvm.sh 17
+        sudo apt update && sudo apt install -y cmake doxygen clang-17 libc++abi-17-dev libc++-17-dev llvm-17-dev nasm
+        echo "NB_CPU=$(grep -c ^processor /proc/cpuinfo)" >> $GITHUB_ENV
+        echo "CC=clang-17" >> $GITHUB_ENV
+        echo "CXX=clang++-17" >> $GITHUB_ENV
+
+    - name: Setup environment variables (MacOS)
+      if: matrix.variants.os == 'macos-latest'
+      run: |
+        echo NB_CPU=$(sysctl -n hw.ncpu) >> $GITHUB_ENV
+
+    - name: Setup environment (common)
+      run: |
+        mkdir build
+        mkdir artifact
+
+    - name: Initialize cmake (Windows)
+      if: matrix.variants.os == 'windows-latest'
+      run: |
+        cmake -S . -B ./build -A ${{ matrix.variants.arch }} ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
+
+    - name: Initialize cmake (Linux)
+      if: matrix.variants.os == 'ubuntu-latest'
+      run: |
+        cmake -S . -B ./build ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
+
+    - name: Initialize cmake (MacOS)
+      if: matrix.variants.os == 'macos-latest'
+      run: |
+        cmake -S . -B ./build ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
+
+    - name: Build library
+      run: |
+        cmake --build ./build --verbose --parallel ${{ env.NB_CPU }} --config ${{ matrix.variants.config }}
+
+    - name: Install library
+      run: |
+        cmake --install ./build --verbose --config ${{ matrix.variants.config }} --prefix ./artifact
+
+    - name: Run tests
+      continue-on-error: true
+      run: |
+        ctest --parallel ${{ env.NB_CPU }} --progress --build-config ${{ matrix.variants.config }} -T test --test-dir ./build
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: libtlsh-${{ matrix.variants.os }}.${{ matrix.variants.config }}-${{ matrix.variants.arch }}-${{ matrix.static }}
+        path: |
+          artifact/
+
+  bindings:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        variant:
+          - {os: windows-latest, arch: x64, config: RelWithDebInfo, py-arch: x64}
+        #   - {os: windows-latest, arch: arm64, config: RelWithDebInfo, py-arch: x64} # Unsupported (see https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json)
+          - {os: ubuntu-latest, arch: x64, config: RelWithDebInfo, py-arch: x64}
+          - {os: macos-latest, arch: x64, config: Release, py-arch: x64}
+    runs-on: ${{ matrix.variant.os }}
+    name: python${{ matrix.python-version }} / ${{ matrix.variant.os }} / ${{ matrix.python-version }} / ${{ matrix.variant.config }}
+    env:
+      CMAKE_FLAGS: ""
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: ${{ matrix.variant.py-arch }}
+
+    - name: Install Python pre-requisites
+      run: |
+        python -m pip install --user --upgrade -r python/requirements.txt
+
+    - name: Environment Setup (Windows)
+      if: matrix.variant.os == 'windows-latest'
+      run: |
+        echo NB_CPU=$env:NUMBER_OF_PROCESSORS | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        echo CMAKE_ARCH='-A ${{ matrix.variant.arch }}' | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        Import-Module .\.github\Invoke-VisualStudio.ps1
+        Invoke-VisualStudio2022${{ matrix.variant.arch }}
+
+    - name: Environment Setup (Linux)
+      if: matrix.variant.os == 'ubuntu-latest'
+      run: |
+        echo "NB_CPU=$(grep -c ^processor /proc/cpuinfo)" >> $GITHUB_ENV
+        sudo apt-get -y update
+        sudo apt install -y g++ ninja-build
+        echo CC=gcc >> $GITHUB_ENV
+        echo CXX=g++ >> $GITHUB_ENV
+
+    - name: Environment Setup (MacOS)
+      if: matrix.variant.os == 'macos-latest'
+      run: |
+        echo NB_CPU=$(sysctl -n hw.ncpu) >> $GITHUB_ENV
+        echo CC=gcc >> $GITHUB_ENV
+        echo CXX=g++ >> $GITHUB_ENV
+
+    - name: Build WHL
+      run: |
+        mkdir wheel
+        python -m pip wheel . -w ./wheel
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: tlsh-py-py${{ matrix.python-version }}-${{ matrix.variant.os }}.${{ matrix.variant.config }}-${{ matrix.variant.arch }}
+        path: |
+          wheel/

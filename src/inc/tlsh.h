@@ -1,0 +1,164 @@
+#pragma once
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "tlsh_impl.h"
+#include "tlsh_version.h"
+
+// -force option no longer used
+// #define	TLSH_OPTION_FORCE	1
+#define TLSH_OPTION_CONSERVATIVE 2
+#define TLSH_OPTION_KEEP_BUCKET 4
+#define TLSH_OPTION_PRIVATE 8
+#define TLSH_OPTION_THREADED 16
+
+
+// Define TLSH_STRING_LEN_REQ, which is the string length of "T1" + the hex value of the Tlsh hash.
+// BUCKETS_256 & CHECKSUM_3B are compiler switches defined in CMakeLists.txt
+#if defined BUCKETS_256
+#define TLSH_STRING_LEN_REQ 136
+// changed the minimum data length to 256 for version 3.3
+#define MIN_DATA_LENGTH 50
+// added the -force option for version 3.5
+// added the -conservatibe option for version 3.17
+#define MIN_CONSERVATIVE_DATA_LENGTH 256
+#endif
+
+#if defined BUCKETS_128
+#define TLSH_STRING_LEN_REQ 72
+// changed the minimum data length to 256 for version 3.3
+#define MIN_DATA_LENGTH 50
+// added the -force option for version 3.5
+// added the -conservatibe option for version 3.17
+#define MIN_CONSERVATIVE_DATA_LENGTH 256
+#endif
+
+#if defined BUCKETS_48
+// No 3 Byte checksum option for 48 Bucket min hash
+#define TLSH_STRING_LEN 30
+// changed the minimum data length to 256 for version 3.3
+#define MIN_DATA_LENGTH 10
+// added the -force option for version 3.5
+#define MIN_CONSERVATIVE_DATA_LENGTH 10
+#endif
+
+#define TLSH_STRING_BUFFER_LEN (TLSH_STRING_LEN_REQ + 1)
+
+#ifdef _WINDOWS
+#define TLSH_API __declspec(dllexport)
+#else
+#define TLSH_API __attribute__((visibility("default")))
+#endif
+
+class TlshImpl;
+
+///
+/// @brief Wrapper class for TLSH implementation
+///
+class TLSH_API Tlsh
+{
+public:
+    Tlsh();
+    Tlsh(const Tlsh &other) = delete;
+    Tlsh(Tlsh &&other)      = default;
+
+
+    // operators
+    Tlsh &
+    operator=(const Tlsh &other) = delete;
+    Tlsh &
+    operator=(Tlsh &&other) = default;
+    bool
+    operator==(const Tlsh &other) const;
+    bool
+    operator!=(const Tlsh &other) const;
+
+
+    ///
+    /// @brief allow the user to add data in multiple iterations
+    ///
+    /// @param [in] data
+    ///
+    void
+    update(std::vector<u8> const &data);
+
+    ///
+    /// @brief to signal the class there is no more data to be added
+    ///
+    /// @param [in] data
+    /// @param [in] tlsh_option
+    ///
+    void
+    final(std::vector<u8> const &data, u32 tlsh_option);
+
+    /* to get the hex-encoded hash code */
+    const std::string
+    getHash(int showvers = 0) const;
+
+    /* to get the hex-encoded hash code without allocating buffer in TlshImpl - bufSize should be
+     * TLSH_STRING_BUFFER_LEN */
+    // const char *
+    // getHash(char *buffer, unsigned int bufSize, int showvers = 0) const;
+
+    /* to bring to object back to the initial state */
+    void
+    reset();
+
+    // access functions
+    int
+    Lvalue();
+    int
+    Q1ratio();
+    int
+    Q2ratio();
+    int
+    Checksum(int k);
+    int
+    BucketValue(int bucket);
+    int
+    HistogramCount(int bucket);
+
+    /* calculate difference */
+    /* The len_diff parameter specifies if the file length is to be included in the difference
+     * calculation (len_diff=true) or if it */
+    /* is to be excluded (len_diff=false).  In general, the length should be considered in the
+     * difference calculation, but there */
+    /* could be applications where a part of the adversarial activity might be to add a lot of
+     * content.  For example to add 1 million */
+    /* zero bytes at the end of a file.  In that case, the caller would want to exclude the length
+     * from the calculation. */
+    int
+    totalDiff(const Tlsh *, bool len_diff = true) const;
+
+    /* validate TrendLSH string and reset the hash according to it */
+    int
+    fromTlshStr(const std::string &str);
+
+    /* check if Tlsh object is valid to operate */
+    bool
+    isValid() const;
+
+    /* display the contents of NOTICE.txt */
+    static void
+    display_notice();
+
+    /* Return the version information used to build this library */
+    static inline std::string version = STR(TLSH_VERSION_MAJOR) "." STR(TLSH_VERSION_MINOR) "." STR(
+        TLSH_VERSION_PATCH) " " TLSH_HASH " " TLSH_CHECKSUM
+                            " sliding_window=" STR(SLIDING_WND_SIZE);
+
+
+private:
+    std::unique_ptr<TlshImpl> impl;
+};
+
+#ifdef TLSH_DISTANCE_PARAMETERS
+void
+set_tlsh_distance_parameters(int length_mult_value,
+    int qratio_mult_value,
+    int hist_diff1_add_value,
+    int hist_diff2_add_value,
+    int hist_diff3_add_value);
+#endif

@@ -1,0 +1,35 @@
+#pragma once
+
+// clang-format off
+#define TLSH_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define TLSH_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define TLSH_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+#define TLSH_HASH "@TLSH_HASH@"
+#define TLSH_CHECKSUM "@TLSH_CHECKSUM@"
+#define TLSH_DISTANCE_PARAMETERS @TLSH_DISTANCE_PARAMETERS@
+// clang-format: on
+
+#define __STR(x) #x
+#define STR(x) __STR(x)
+#define __WIDE(x) L#x
+#define WIDECHAR(x) __WIDE(x)
+#define __WIDE2(x) L##x
+#define WIDECHAR2(x) __WIDE2(x)
+#define CONCAT(x, y) (x##y)
+
+#include <cstdint>
+using u8 = unsigned char;
+using i8 = char;
+using u32 = uint32_t;
+using i32 = int32_t;
+
+#if defined _WINDOWS
+using usize = size_t;
+#elif defined _LINUX
+using usize = std::size_t;
+#elif defined _MACOS
+#include <stddef.h>
+using usize = size_t;
+#endif
+

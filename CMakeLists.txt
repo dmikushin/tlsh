@@ -1,182 +1,167 @@
-# TLSH is provided for use under two licenses: Apache OR BSD.
-# Users may opt to use either license depending on the license
-# restictions of the systems with which they plan to integrate
-# the TLSH code.
-#
-# ==============
-# Apache License
-# ==============
-# Copyright 2013 Trend Micro Incorporated
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# ===========
-# BSD License
-# ===========
-# Copyright (c) 2013, Trend Micro Incorporated
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without modification,
-# are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
+cmake_minimum_required(VERSION 3.20)
 
-# 3. Neither the name of the copyright holder nor the names of its contributors
-#    may be used to endorse or promote products derived from this software without
-#    specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-# IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-# OF THE POSSIBILITY OF SUCH DAMAGE.
+project(
+  TLSH
+  VERSION 4.12.0
+  LANGUAGES CXX
+  DESCRIPTION "TLSH C++ implementation"
+)
 
-cmake_minimum_required(VERSION 2.6)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(VCPKG_MANIFEST_MODE OFF)
+set(CXX_STANDARD 20)
 
-project(TLSH)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+<<<<<<< HEAD
+option(TLSH_BUILD_STATIC "Build as static library instead of shared library" ON)
+option(TLSH_BUILD_BINDINGS "Build Python bindings" ON)
+=======
 set(VERSION_MAJOR 4)
 set(VERSION_MINOR 11)
-set(VERSION_PATCH 2)
+set(VERSION_PATCH 1)
+>>>>>>> parent of 74efd09 (**4.11.2**)
 
-# TLSH uses only half the counting buckets.
-# It can use all the buckets now.
+# # TLSH uses only half the counting buckets.
+# # It can use all the buckets now.
 set(TLSH_BUCKETS_128 1)
-if(TLSH_BUCKETS_48 EQUAL 1)
-  set(TLSH_HASH "min hash")
-  add_definitions(-DBUCKETS_48)
-endif()
-if(TLSH_BUCKETS_128 EQUAL 1)
-  set(TLSH_HASH "compact hash")
-  add_definitions(-DBUCKETS_128)
-endif()
-if(TLSH_BUCKETS_256 EQUAL 1)
-  set(TLSH_HASH "full hash")
-  add_definitions(-DBUCKETS_256)
-endif()
+set(TLSH_HASH "compact hash")
 
-# TLSH uses 1 byte checksum. The collision rate is 1 in 24.
-# It can use 3 bytes checksum now. That collision rate in 1 in 5800.
-set(TLSH_CHECKSUM_1B 1)
+# if(TLSH_BUCKETS_48 EQUAL 1)
+#   set(TLSH_HASH "min hash")
+#   add_definitions(-DBUCKETS_48)
+# endif()
+# if(TLSH_BUCKETS_128 EQUAL 1)
+#   add_definitions(-DBUCKETS_128)
+# endif()
+# if(TLSH_BUCKETS_256 EQUAL 1)
+#   set(TLSH_HASH "full hash")
+#   add_definitions(-DBUCKETS_256)
+# endif()
 
-if(TLSH_CHECKSUM_0B EQUAL 1)
-  set(TLSH_CHECKSUM "no checksum")
-  add_definitions(-DCHECKSUM_0B)
-endif()
-if(TLSH_CHECKSUM_1B EQUAL 1)
-  set(TLSH_CHECKSUM "1 byte checksum")
-endif()
-if(TLSH_CHECKSUM_3B EQUAL 1)
-  set(TLSH_CHECKSUM "3 bytes checksum")
-  add_definitions(-DCHECKSUM_3B)
-endif()
+# # TLSH uses 1 byte checksum. The collision rate is 1 in 24.
+# # It can use 3 bytes checksum now. That collision rate in 1 in 5800.
+set(TLSH_CHECKSUM 1)
+
+# if(TLSH_CHECKSUM_0B EQUAL 1)
+#   set(TLSH_CHECKSUM "no checksum")
+#   add_definitions(-DCHECKSUM_0B)
+# endif()
+# if(TLSH_CHECKSUM_1B EQUAL 1)
+#   set(TLSH_CHECKSUM "1 byte checksum")
+# endif()
+# if(TLSH_CHECKSUM_3B EQUAL 1)
+#   set(TLSH_CHECKSUM "3 bytes checksum")
+#   add_definitions(-DCHECKSUM_3B)
+# endif()
 
 # setting TLSH_DISTANCE_PARAMETERS to 1 allows you to set command line arguments
 # to set - and hence experiment with the distance parameters
 #	by default this is zero
 set(TLSH_DISTANCE_PARAMETERS 0)
 
-# write a file with the VERSION information
-file(REMOVE VERSION)
-file(WRITE VERSION 
-  "// This file is generated by cmake.  Modify\n"
-  "// CMakeLists.txt to change the VERSION numbers\n"
-  "TLSH version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH} ${TLSH_HASH}, ${TLSH_CHECKSUM}\n")
-  
-file(REMOVE include/version.h)
-file(REMOVE include/tlsh_version.h)
-file(WRITE include/tlsh_version.h
-  "/****************************************************\n"
-  " * This file is generated by cmake.  Modify the top\n"
-  " * level CMakeLists.txt to change the VERSION numbers\n"
-  " ****************************************************/\n\n"
-  "#define VERSION_MAJOR ${VERSION_MAJOR}\n"
-  "#define VERSION_MINOR ${VERSION_MINOR}\n"
-  "#define VERSION_PATCH ${VERSION_PATCH}\n"
-  "#define TLSH_HASH \"${TLSH_HASH}\"\n"
-  "#define TLSH_CHECKSUM \"${TLSH_CHECKSUM}\"\n")
-if(TLSH_DISTANCE_PARAMETERS EQUAL 1)
-file(APPEND include/tlsh_version.h
-  "#define TLSH_DISTANCE_PARAMETERS ${TLSH_DISTANCE_PARAMETERS}\n")
-endif()
+# # write a file with the VERSION information
+# file(REMOVE VERSION)
+# file(WRITE VERSION
+#   "// This file is generated by cmake.  Modify\n"
+#   "// CMakeLists.txt to change the VERSION numbers\n"
+#   "TLSH version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH} ${TLSH_HASH}, ${TLSH_CHECKSUM}\n")
 
-if (CMAKE_BUILD_TYPE STREQUAL Debug)
-    if(CMAKE_COMPILER_IS_GNUCXX)
-        set(CMAKE_CXX_FLAGS "-g")
-    endif()
-else(CMAKE_BUILD_TYPE STREQUAL Debug)
-    if(MSVC)
-        set(CMAKE_CXX_FLAGS "/O2")        ## Optimize
-    else(MSVS)
-        set(CMAKE_CXX_FLAGS "-O3")
-    endif()
-endif(CMAKE_BUILD_TYPE STREQUAL Debug)
+# file(REMOVE include/version.h)
+# file(REMOVE include/tlsh_version.h)
+# file(WRITE include/tlsh_version.h
+#   "/****************************************************\n"
+#   " * This file is generated by cmake.  Modify the top\n"
+#   " * level CMakeLists.txt to change the VERSION numbers\n"
+#   " ****************************************************/\n\n"
+#   "#define VERSION_MAJOR ${VERSION_MAJOR}\n"
+#   "#define VERSION_MINOR ${VERSION_MINOR}\n"
+#   "#define VERSION_PATCH ${VERSION_PATCH}\n"
+#   "#define TLSH_HASH \"${TLSH_HASH}\"\n"
+#   "#define TLSH_CHECKSUM \"${TLSH_CHECKSUM}\"\n")
+# if(TLSH_DISTANCE_PARAMETERS EQUAL 1)
+# file(APPEND include/tlsh_version.h
+#   "#define TLSH_DISTANCE_PARAMETERS ${TLSH_DISTANCE_PARAMETERS}\n")
+# endif()
 
-if(MSVC)
-    add_definitions(-DWINDOWS -DTLSH_LIB)
-    include_directories(Windows)
-endif()
+# if (CMAKE_BUILD_TYPE STREQUAL Debug)
+#     if(CMAKE_COMPILER_IS_GNUCXX)
+#         set(CMAKE_CXX_FLAGS "-g")
+#     endif()
+# else(CMAKE_BUILD_TYPE STREQUAL Debug)
+#     if(MSVC)
+#         set(CMAKE_CXX_FLAGS "/O2")        ## Optimize
+#     else(MSVS)
+#         set(CMAKE_CXX_FLAGS "-O3")
+#     endif()
+# endif(CMAKE_BUILD_TYPE STREQUAL Debug)
+
+# if(MSVC)
+#     add_definitions(-DTLSH_LIB)
+#     # include_directories(Windows)
+# endif()
 
 # user can override CXX; make sure tests link and load properly regardless of LD_LIBRARY_PATH
+<<<<<<< HEAD
+# if(CMAKE_COMPILER_IS_GNUCXX)
+#     # issue #116 Library will not compile on CENTOS 7
+#     # set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
+#     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc")
+# endif()
+=======
 if(CMAKE_COMPILER_IS_GNUCXX)
-    # issue #116 Library will not compile on CENTOS 7
-    # set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
-    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc")
+    # previously used:    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc")
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libstdc++")
 endif()
+>>>>>>> parent of 74efd09 (**4.11.2**)
 
-# from https://stackoverflow.com/questions/5395309/how-do-i-force-cmake-to-include-pthread-option-during-compilation
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-# This flag seems to only be for older versions of CMake, such as https://cmake.org/cmake/help/v3.2/module/FindThreads.html
-set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-find_package(Threads REQUIRED)
+# # from https://stackoverflow.com/questions/5395309/how-do-i-force-cmake-to-include-pthread-option-during-compilation
+# set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 
-enable_testing()
+# # This flag seems to only be for older versions of CMake, such as https://cmake.org/cmake/help/v3.2/module/FindThreads.html
+# set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+# find_package(Threads REQUIRED)
 
-include_directories(include)
+# TODO
+# enable_testing()
+
+set(TLSH_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
+
 add_subdirectory(src)
-add_subdirectory(test)
-add_subdirectory(utils)
-add_subdirectory(Testing)
 
-if(MSVC)
-    add_subdirectory(Windows)
-endif()
+if(TLSH_BUILD_BINDINGS)
+  if (NOT TLSH_BUILD_STATIC)
+    message(FATAL_ERROR "Bindings require static build")
+  endif (NOT TLSH_BUILD_STATIC)
+  add_subdirectory(python)
+endif(TLSH_BUILD_BINDINGS)
 
-set(CPACK_GENERATOR "TGZ")
-set(CPACK_SOURCE_GENERATOR "TGZ")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "TLSH-${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-set(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
-set(CPACK_SOURCE_IGNORE_FILES
-"~$"
-"^${PROJECT_SOURCE_DIR}/bin/"
-"^${PROJECT_SOURCE_DIR}/lib/"
-"^${PROJECT_SOURCE_DIR}/build/"
-"^${PROJECT_SOURCE_DIR}/py_ext/data/"
-"^${PROJECT_SOURCE_DIR}/py_ext/build/"
-"^${PROJECT_SOURCE_DIR}/Testing/tmp/"
-"^${PROJECT_SOURCE_DIR}/CMakeFiles/"
-)
-include(CPack)
+
+# add_subdirectory(test)
+# add_subdirectory(utils)
+# add_subdirectory(Testing)
+
+# if(MSVC)
+#     add_subdirectory(Windows)
+# endif()
+
+# set(CPACK_GENERATOR "TGZ")
+# set(CPACK_SOURCE_GENERATOR "TGZ")
+# set(CPACK_SOURCE_PACKAGE_FILE_NAME "TLSH-${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+# set(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
+# set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
+# set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
+# set(CPACK_SOURCE_IGNORE_FILES
+# "~$"
+# "^${PROJECT_SOURCE_DIR}/bin/"
+# "^${PROJECT_SOURCE_DIR}/lib/"
+# "^${PROJECT_SOURCE_DIR}/build/"
+# "^${PROJECT_SOURCE_DIR}/py_ext/data/"
+# "^${PROJECT_SOURCE_DIR}/py_ext/build/"
+# "^${PROJECT_SOURCE_DIR}/Testing/tmp/"
+# "^${PROJECT_SOURCE_DIR}/CMakeFiles/"
+# )
+# include(CPack)
 

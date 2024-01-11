@@ -3,7 +3,7 @@
  * Users may opt to use either license depending on the license
  * restictions of the systems with which they plan to integrate
  * the TLSH code.
- */ 
+ */
 
 /* ==============
  * Apache License
@@ -56,197 +56,187 @@
  */
 
 #include "tlsh.h"
-#include "tlsh_impl.h"
-#include "stdio.h"
+
 #include <errno.h>
 #include <string.h>
+
+#include "stdio.h"
+#include "tlsh_impl.h"
 
 /////////////////////////////////////////////////////
 // C++ Implementation
 
-Tlsh::Tlsh():impl(NULL)
+
+Tlsh::Tlsh() : impl{std::make_unique<TlshImpl>()}
 {
-    impl = new TlshImpl();
 }
 
-Tlsh::Tlsh(const Tlsh& other):impl(NULL)
+
+void
+Tlsh::display_notice()
 {
-    impl = new TlshImpl();
-    *impl = *other.impl;
+    printf("   =========================================================================\n");
+    printf("   ==  NOTICE file for use with the Apache License, Version 2.0,          ==\n");
+    printf("   ==  in this case for the Trend Locality Sensitive Hash distribution.   ==\n");
+    printf("   =========================================================================\n");
+    printf("\n");
+    printf("   Trend Locality Sensitive Hash (TLSH)\n");
+    printf("   Copyright 2010-2014 Trend Micro\n");
+    printf("\n");
+    printf("   This product includes software developed at\n");
+    printf("   Trend Micro (http://www.trendmicro.com/)\n");
+    printf("\n");
+    printf("   Refer to the following publications for more information:\n");
+    printf("   \n");
+    printf("     Jonathan Oliver, Chun Cheng and Yanggui Chen,\n");
+    printf("     \"TLSH - A Locality Sensitive Hash\"\n");
+    printf("     4th Cybercrime and Trustworthy Computing Workshop, Sydney, November 2013\n");
+    printf("     https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf\n");
+    printf("    \n");
+    printf("     Jonathan Oliver, Scott Forman and Chun Cheng,\n");
+    printf("     \"Using Randomization to Attack Similarity Digests\"\n");
+    printf(
+        "     Applications and Techniques in Information Security. Springer Berlin Heidelberg, "
+        "2014. 199-210.\n");
+    printf("     https://github.com/trendmicro/tlsh/blob/master/Attacking_LSH_and_Sim_Dig.pdf\n");
+    printf("\n");
+    printf("     Jonathan Oliver and Jayson Pryde\n");
+    printf(
+        "     "
+        "http://blog.trendmicro.com/trendlabs-security-intelligence/"
+        "smart-whitelisting-using-locality-sensitive-hashing/\n");
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    printf("    \n");
+    printf("   SHA1 of first 242 lines of LICENSE - so that we can append NOTICE.txt to LICENSE\n");
+    printf("   $ head -n 242 LICENSE | openssl dgst -sha1\n");
+    printf("   (stdin)= 11e8757af16132dd60979eacd73a525a40ff31f0\n");
+    printf("\n");
 }
 
-Tlsh::~Tlsh()
+
+void
+Tlsh::update(std::vector<u8> const &data)
 {
-    delete impl;
+    //
+    // threaded and private options only available to
+    //	windowsize == 5
+    //	calling final - without calling update first
+    //
+    const u32 tlsh_option = 0;
+    impl->update(data.data(), data.size(), tlsh_option);
 }
 
-void Tlsh::display_notice()
+void
+Tlsh::final(std::vector<u8> const &data, u32 tlsh_option)
 {
-	printf("   =========================================================================\n");
-	printf("   ==  NOTICE file for use with the Apache License, Version 2.0,          ==\n");
-	printf("   ==  in this case for the Trend Locality Sensitive Hash distribution.   ==\n");
-	printf("   =========================================================================\n");
-	printf("\n");
-	printf("   Trend Locality Sensitive Hash (TLSH)\n");
-	printf("   Copyright 2010-2014 Trend Micro\n");
-	printf("\n");
-	printf("   This product includes software developed at\n");
-	printf("   Trend Micro (http://www.trendmicro.com/)\n");
-	printf("\n");
-	printf("   Refer to the following publications for more information:\n");
-	printf("   \n");
-	printf("     Jonathan Oliver, Chun Cheng and Yanggui Chen,\n");
-	printf("     \"TLSH - A Locality Sensitive Hash\"\n");
-	printf("     4th Cybercrime and Trustworthy Computing Workshop, Sydney, November 2013\n");
-	printf("     https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf\n");
-	printf("    \n");
-	printf("     Jonathan Oliver, Scott Forman and Chun Cheng,\n");
-	printf("     \"Using Randomization to Attack Similarity Digests\"\n");
-	printf("     Applications and Techniques in Information Security. Springer Berlin Heidelberg, 2014. 199-210.\n");
-	printf("     https://github.com/trendmicro/tlsh/blob/master/Attacking_LSH_and_Sim_Dig.pdf\n");
-	printf("\n");
-	printf("     Jonathan Oliver and Jayson Pryde\n");
-	printf("     http://blog.trendmicro.com/trendlabs-security-intelligence/smart-whitelisting-using-locality-sensitive-hashing/\n");
-	printf("\n");
-	printf("\n");
-	printf("\n");
-	printf("\n");
-	printf("\n");
-	printf("\n");
-	printf("\n");
-	printf("\n");
-	printf("    \n");
-	printf("   SHA1 of first 242 lines of LICENSE - so that we can append NOTICE.txt to LICENSE\n");
-	printf("   $ head -n 242 LICENSE | openssl dgst -sha1\n");
-	printf("   (stdin)= 11e8757af16132dd60979eacd73a525a40ff31f0\n");
-	printf("\n");
-}
-
-const char *Tlsh::version()
-{
-    static char versionBuf[256];
-    if (versionBuf[0] == '\0')
-        snprintf(versionBuf, sizeof(versionBuf), "%d.%d.%d %s %s sliding_window=%d",
-		VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, TLSH_HASH, TLSH_CHECKSUM, SLIDING_WND_SIZE);
-    return versionBuf;
-}
-
-void Tlsh::update(const unsigned char* data, unsigned int len)
-{
-	//
-	// threaded and private options only available to
-	//	windowsize == 5
-	//	calling final - without calling update first
-	//
-	int tlsh_option	= 0;
-	if (impl != NULL)
-		impl->update(data, len, tlsh_option);
-}
-
-void Tlsh::final(const unsigned char* data, unsigned int len, int tlsh_option)
-{
-	if (NULL != impl) {
-		if ((data != NULL) && (len > 0))
-			impl->update(data, len, tlsh_option);
-		impl->final(tlsh_option);
-	}
-}
-
-const char* Tlsh::getHash(int showvers) const
-{
-    if ( NULL != impl )
-        return impl->hash(showvers);
-    else
-        return "";
-}
-
-const char* Tlsh::getHash (char *buffer, unsigned int bufSize, int showvers) const
-{
-    if ( NULL != impl )
-        return impl->hash(buffer, bufSize, showvers);
-    else {
-        buffer[0] = '\0';
-        return buffer;
+    if (data.size() > 0)
+    {
+        impl->update(data.data(), data.size(), tlsh_option);
     }
+
+    impl->final(tlsh_option);
 }
 
-void Tlsh::reset()
+const std::string
+Tlsh::getHash(int showvers) const
 {
-    if ( NULL != impl )
-        impl->reset();
+    return impl->hash(showvers);
 }
 
-Tlsh& Tlsh::operator=(const Tlsh& other)
-{
-    if (this == &other) 
-        return *this;
+// const char *
+// Tlsh::getHash(char *buffer, unsigned int bufSize, int showvers) const
+// {
+//     if (nullptr != impl)
+//         return impl->hash(buffer, bufSize, showvers);
+//     else
+//     {
+//         buffer[0] = '\0';
+//         return buffer;
+//     }
+// }
 
-    *impl = *other.impl;
-    return *this;
+void
+Tlsh::reset()
+{
+    impl->reset();
 }
 
-bool Tlsh::operator==(const Tlsh& other) const
+
+bool
+Tlsh::operator==(const Tlsh &other) const
 {
-    if( this == &other )
+    if (this == &other)
+    {
         return true;
-    else if( NULL == impl || NULL == other.impl )
-        return false;
-    else
-        return ( 0 == impl->compare(*other.impl) );
+    }
+
+    return (0 == impl->compare(*other.impl));
 }
 
-bool Tlsh::operator!=(const Tlsh& other) const 
+bool
+Tlsh::operator!=(const Tlsh &other) const
 {
-    return !(*this==other);
+    return !this->operator==(other);
 }
 
-int Tlsh::Lvalue()
+int
+Tlsh::Lvalue()
 {
-	return( impl->Lvalue() );
+    return (impl->Lvalue());
 }
-int Tlsh::Q1ratio()
+int
+Tlsh::Q1ratio()
 {
-	return( impl->Q1ratio() );
+    return (impl->Q1ratio());
 }
-int Tlsh::Q2ratio()
+int
+Tlsh::Q2ratio()
 {
-	return( impl->Q2ratio() );
+    return (impl->Q2ratio());
 }
-int Tlsh::Checksum(int k)
+int
+Tlsh::Checksum(int k)
 {
-	return( impl->Checksum(k) );
+    return (impl->Checksum(k));
 }
-int Tlsh::BucketValue(int bucket)
+int
+Tlsh::BucketValue(int bucket)
 {
-	return( impl->BucketValue(bucket) );
+    return (impl->BucketValue(bucket));
 }
 
-int Tlsh::HistogramCount(int bucket)
+int
+Tlsh::HistogramCount(int bucket)
 {
-	return( impl->HistogramCount(bucket) );
+    return (impl->HistogramCount(bucket));
 }
 
-int Tlsh::totalDiff(const Tlsh *other, bool len_diff) const
+int
+Tlsh::totalDiff(const Tlsh *other, bool len_diff) const
 {
-    if( NULL==impl || NULL == other || NULL == other->impl )
+    if (nullptr == impl || nullptr == other || nullptr == other->impl)
         return -(EINVAL);
-    else if ( this == other )
+    else if (this == other)
         return 0;
     else
         return (impl->totalDiff(*other->impl, len_diff));
 }
 
-int Tlsh::fromTlshStr(const char* str)
+int
+Tlsh::fromTlshStr(const std::string &str)
 {
-    if ( NULL == impl )
-        return -(ENOMEM);
-    else if ( NULL == str )
-        return -(EINVAL);
-    else
-        return impl->fromTlshStr(str);
+    return impl->fromTlshStr(str.data());
 }
 
-bool Tlsh::isValid() const
+bool
+Tlsh::isValid() const
 {
-    return (impl ? impl->isValid() : false);
+    return impl->isValid();
 }
