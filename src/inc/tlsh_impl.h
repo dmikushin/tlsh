@@ -21,9 +21,8 @@
 #define TLSH_CHECKSUM_LEN 1
 // defined in tlsh.h   #define TLSH_STRING_LEN   134  // 2 + 1 + 64 bytes = 134 hexidecimal chars
 #endif
-#endif
 
-#if defined BUCKETS_128
+#elif defined BUCKETS_128
 #define EFF_BUCKETS 128
 #define CODE_SIZE 32 // 128 * 2 bits = 32 bytes
 #if defined CHECKSUM_3B
@@ -35,14 +34,15 @@
 #define TLSH_CHECKSUM_LEN 1
 // defined in tlsh.h   #define TLSH_STRING_LEN   70   // 2 + 1 + 32 bytes = 70 hexidecimal chars
 #endif
-#endif
 
-#if defined BUCKETS_48
+#elif defined BUCKETS_48
 #define INTERNAL_TLSH_STRING_LEN 33
 #define EFF_BUCKETS 48
 #define CODE_SIZE 12 // 48 * 2 bits = 12 bytes
 #define TLSH_CHECKSUM_LEN 1
 // defined in tlsh.h   #define TLSH_STRING_LEN   30   // 2 + 1 + 12 bytes = 30 hexidecimal chars
+#else
+#error "invalid bucket"
 #endif
 
 class TlshImpl

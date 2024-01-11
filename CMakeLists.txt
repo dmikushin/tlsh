@@ -20,20 +20,17 @@ option(TLSH_BUILD_BINDINGS "Build Python bindings" ON)
 
 # # TLSH uses only half the counting buckets.
 # # It can use all the buckets now.
-set(TLSH_BUCKETS_128 1)
-set(TLSH_HASH "compact hash")
+set(TLSH_BUCKETS 128)
 
-# if(TLSH_BUCKETS_48 EQUAL 1)
-#   set(TLSH_HASH "min hash")
-#   add_definitions(-DBUCKETS_48)
-# endif()
-# if(TLSH_BUCKETS_128 EQUAL 1)
-#   add_definitions(-DBUCKETS_128)
-# endif()
-# if(TLSH_BUCKETS_256 EQUAL 1)
-#   set(TLSH_HASH "full hash")
-#   add_definitions(-DBUCKETS_256)
-# endif()
+if(TLSH_BUCKETS EQUAL 48)
+  set(TLSH_HASH "min hash")
+elseif(TLSH_BUCKETS EQUAL 128)
+  set(TLSH_HASH "compact hash")
+elseif(TLSH_BUCKETS EQUAL 256)
+  set(TLSH_HASH "full hash")
+else()
+  message(FATAL_ERROR "Invalid TLSH_BUCKETS value")
+endif()
 
 # # TLSH uses 1 byte checksum. The collision rate is 1 in 24.
 # # It can use 3 bytes checksum now. That collision rate in 1 in 5800.

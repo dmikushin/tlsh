@@ -44,5 +44,5 @@ def test_batch_test():
 
     for fname, expected_value in expected_values:
         buf = (TEST_DATA_PATH / fname).open("rb").read()
-        assert tlsh.hexdigest(buf).lower() == expected_value.lower()
+        assert tlsh.hexdigest(buf).upper() == expected_value.upper()
         assert tlsh.digest(buf) == bytes.fromhex(expected_value)

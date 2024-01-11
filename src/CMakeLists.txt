@@ -30,7 +30,11 @@ target_sources(tlsh PRIVATE ${SOURCE_FILES})
 
 target_include_directories(tlsh PUBLIC ${TLSH_INC_DIR} ${TLSH_INC_DIR}/win32)
 
-target_compile_definitions(tlsh PUBLIC BUCKETS_128)
+target_compile_definitions(tlsh
+    PUBLIC
+        BUCKETS_${TLSH_BUCKETS}
+        CHECKSUM_${TLSH_CHECKSUM}B
+)
 
 if(WIN32)
     target_compile_definitions(tlsh PUBLIC _WINDOWS)

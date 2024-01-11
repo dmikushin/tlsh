@@ -24,24 +24,25 @@
 // added the -force option for version 3.5
 // added the -conservatibe option for version 3.17
 #define MIN_CONSERVATIVE_DATA_LENGTH 256
-#endif
 
-#if defined BUCKETS_128
+#elif defined BUCKETS_128
 #define TLSH_STRING_LEN_REQ 72
 // changed the minimum data length to 256 for version 3.3
 #define MIN_DATA_LENGTH 50
 // added the -force option for version 3.5
 // added the -conservatibe option for version 3.17
 #define MIN_CONSERVATIVE_DATA_LENGTH 256
-#endif
 
-#if defined BUCKETS_48
+#elif defined BUCKETS_48
 // No 3 Byte checksum option for 48 Bucket min hash
 #define TLSH_STRING_LEN 30
 // changed the minimum data length to 256 for version 3.3
 #define MIN_DATA_LENGTH 10
 // added the -force option for version 3.5
 #define MIN_CONSERVATIVE_DATA_LENGTH 10
+
+#else
+#error "Invalid bucket"
 #endif
 
 #define TLSH_STRING_BUFFER_LEN (TLSH_STRING_LEN_REQ + 1)
@@ -145,9 +146,9 @@ public:
     display_notice();
 
     /* Return the version information used to build this library */
-    static inline std::string version = STR(TLSH_VERSION_MAJOR) "." STR(TLSH_VERSION_MINOR) "." STR(
-        TLSH_VERSION_PATCH) " " TLSH_HASH " " TLSH_CHECKSUM
-                            " sliding_window=" STR(SLIDING_WND_SIZE);
+    static inline std::string version =
+        STR(TLSH_VERSION_MAJOR) "." STR(TLSH_VERSION_MINOR) "." STR(TLSH_VERSION_PATCH) " " STR(
+            TLSH_HASH) ", " STR(TLSH_CHECKSUM) " byte checksum, sliding_window=" STR(SLIDING_WND_SIZE);
 
 
 private:
