@@ -13,10 +13,7 @@ set(SOURCE_FILES
 )
 
 if(WIN32)
-    set(SOURCE_FILES
-        ${SOURCE_FILES}
-        # ${TLSH_SRC_DIR}/win32/WinFunctions.cpp
-    )
+
 endif()
 
 if(TLSH_BUILD_STATIC)
