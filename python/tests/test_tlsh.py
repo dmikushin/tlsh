@@ -4,7 +4,7 @@ import random
 
 CURFILE = pathlib.Path(__file__)
 CURDIR = CURFILE.parent
-TEST_DATA_PATH = CURDIR / "../../data"
+TEST_DATA_PATH = CURDIR / "../../tests"
 
 
 def rand(n: int):
@@ -28,11 +28,17 @@ def test_basic_test():
         a = tlsh.Tlsh()
         a.update(buf)
         a.final()
+
+        b = tlsh.Tlsh()
+        b.update(buf)
+        b.final()
+
         assert bool(a)
         assert isinstance(a.hexdigest(), str)
         assert isinstance(a.digest(), bytes)
         assert val == a.digest()
         assert hexval == a.hexdigest()
+        assert a.diff(b) == 0
 
 
 def test_batch_test():
@@ -44,5 +50,12 @@ def test_batch_test():
 
     for fname, expected_value in expected_values:
         buf = (TEST_DATA_PATH / fname).open("rb").read()
-        assert tlsh.hexdigest(buf).upper() == expected_value.upper()
-        assert tlsh.digest(buf) == bytes.fromhex(expected_value)
+        tlsh_hex = tlsh.hexdigest(buf).upper()
+        tlsh_raw = tlsh.digest(buf)
+        assert (
+            tlsh_hex == expected_value.upper()
+        ), f"Mismatch on {fname}: expected={expected_value.upper()}  got={tlsh_hex}"
+
+        assert tlsh_raw == bytes.fromhex(
+            expected_value
+        ), f"Mismatch on {fname}: expected={tlsh_raw}  got={bytes.fromhex(expected_value)}"

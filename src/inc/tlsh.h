@@ -131,7 +131,7 @@ public:
     /* zero bytes at the end of a file.  In that case, the caller would want to exclude the length
      * from the calculation. */
     int
-    totalDiff(const Tlsh *, bool len_diff = true) const;
+    totalDiff(const Tlsh &, bool len_diff = true) const;
 
     /* validate TrendLSH string and reset the hash according to it */
     int
@@ -151,8 +151,14 @@ public:
             TLSH_HASH) ", " STR(TLSH_CHECKSUM) " byte checksum, sliding_window=" STR(SLIDING_WND_SIZE);
 
 
+    std::unique_ptr<TlshImpl> const &
+    impl() const
+    {
+        return m_Implementation;
+    }
+
 private:
-    std::unique_ptr<TlshImpl> impl;
+    std::unique_ptr<TlshImpl> m_Implementation;
 };
 
 #ifdef TLSH_DISTANCE_PARAMETERS

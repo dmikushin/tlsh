@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "tlsh_version.h"
 
 #define SLIDING_WND_SIZE 5
@@ -70,7 +72,7 @@ public:
     int
     compare(const TlshImpl &other) const;
     int
-    totalDiff(const TlshImpl &other, bool len_diff = true) const;
+    totalDiff(std::unique_ptr<TlshImpl> const &other, bool len_diff = true) const;
     int
     Lvalue();
     int

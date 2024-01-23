@@ -60,6 +60,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include <stdexcept>
+
 #include "stdio.h"
 #include "tlsh_impl.h"
 
@@ -67,7 +69,7 @@
 // C++ Implementation
 
 
-Tlsh::Tlsh() : impl{std::make_unique<TlshImpl>()}
+Tlsh::Tlsh() : m_Implementation{std::make_unique<TlshImpl>()}
 {
 }
 
@@ -130,7 +132,7 @@ Tlsh::update(std::vector<u8> const &data)
     //	calling final - without calling update first
     //
     const u32 tlsh_option = 0;
-    impl->update(data.data(), data.size(), tlsh_option);
+    m_Implementation->update(data.data(), data.size(), tlsh_option);
 }
 
 void
@@ -138,16 +140,16 @@ Tlsh::final(std::vector<u8> const &data, u32 tlsh_option)
 {
     if (data.size() > 0)
     {
-        impl->update(data.data(), data.size(), tlsh_option);
+        m_Implementation->update(data.data(), data.size(), tlsh_option);
     }
 
-    impl->final(tlsh_option);
+    m_Implementation->final(tlsh_option);
 }
 
 const std::string
 Tlsh::getHash(int showvers) const
 {
-    return impl->hash(showvers);
+    return m_Implementation->hash(showvers);
 }
 
 // const char *
@@ -165,7 +167,7 @@ Tlsh::getHash(int showvers) const
 void
 Tlsh::reset()
 {
-    impl->reset();
+    m_Implementation->reset();
 }
 
 
@@ -177,7 +179,7 @@ Tlsh::operator==(const Tlsh &other) const
         return true;
     }
 
-    return (0 == impl->compare(*other.impl));
+    return (0 == m_Implementation->compare(*other.m_Implementation));
 }
 
 bool
@@ -189,54 +191,54 @@ Tlsh::operator!=(const Tlsh &other) const
 int
 Tlsh::Lvalue()
 {
-    return (impl->Lvalue());
+    return (m_Implementation->Lvalue());
 }
 int
 Tlsh::Q1ratio()
 {
-    return (impl->Q1ratio());
+    return (m_Implementation->Q1ratio());
 }
 int
 Tlsh::Q2ratio()
 {
-    return (impl->Q2ratio());
+    return (m_Implementation->Q2ratio());
 }
 int
 Tlsh::Checksum(int k)
 {
-    return (impl->Checksum(k));
+    return (m_Implementation->Checksum(k));
 }
 int
 Tlsh::BucketValue(int bucket)
 {
-    return (impl->BucketValue(bucket));
+    return (m_Implementation->BucketValue(bucket));
 }
 
 int
 Tlsh::HistogramCount(int bucket)
 {
-    return (impl->HistogramCount(bucket));
+    return (m_Implementation->HistogramCount(bucket));
 }
 
 int
-Tlsh::totalDiff(const Tlsh *other, bool len_diff) const
+Tlsh::totalDiff(const Tlsh &other, bool len_diff) const
 {
-    if (nullptr == impl || nullptr == other || nullptr == other->impl)
-        return -(EINVAL);
-    else if (this == other)
+    if (this->impl().get() == other.impl().get())
+    {
         return 0;
-    else
-        return (impl->totalDiff(*other->impl, len_diff));
+    }
+
+    return this->m_Implementation->totalDiff(other.impl(), len_diff);
 }
 
 int
 Tlsh::fromTlshStr(const std::string &str)
 {
-    return impl->fromTlshStr(str.data());
+    return m_Implementation->fromTlshStr(str.data());
 }
 
 bool
 Tlsh::isValid() const
 {
-    return impl->isValid();
+    return m_Implementation->isValid();
 }

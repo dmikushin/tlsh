@@ -23,6 +23,7 @@ NB_MODULE(_tlsh, m)
         .def("final", &Tlsh::final)
         .def("getHash", &Tlsh::getHash)
         .def("isValid", &Tlsh::isValid)
+        .def("totalDiff", &Tlsh::totalDiff)
         .def("fromTlshStr", &Tlsh::fromTlshStr)
         .def_ro_static("version", &Tlsh::version);
 }
