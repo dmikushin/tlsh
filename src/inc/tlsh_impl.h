@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <memory>
 
 #include "tlsh_version.h"
@@ -9,43 +10,27 @@
 #define BUCKETS 256
 #define Q_BITS 2 // 2 bits; quartile value 0, 1, 2, 3
 
-// BUCKETS_256 & CHECKSUM_3B are compiler switches defined in CMakeLists.txt
+#if NB_TLSH_BUCKETS == 256
+#define TLS_BLOCK_GRANULARITY 64
 
-#if defined BUCKETS_256
-#define EFF_BUCKETS 256
-#define CODE_SIZE 64 // 256 * 2 bits = 64 bytes
-#if defined CHECKSUM_3B
-#define INTERNAL_TLSH_STRING_LEN 138
-#define TLSH_CHECKSUM_LEN 3
-// defined in tlsh.h   #define TLSH_STRING_LEN   138  // 2 + 3 + 64 bytes = 138 hexidecimal chars
-#else
-#define INTERNAL_TLSH_STRING_LEN 134
-#define TLSH_CHECKSUM_LEN 1
-// defined in tlsh.h   #define TLSH_STRING_LEN   134  // 2 + 1 + 64 bytes = 134 hexidecimal chars
+#elif NB_TLSH_BUCKETS == 128
+#define TLS_BLOCK_GRANULARITY 32
+
+#elif NB_TLSH_BUCKETS == 48
+#define TLS_BLOCK_GRANULARITY 12
+#if TLSH_CHECKSUM == 3
+#error "invalid bucket/checksum combination"
 #endif
 
-#elif defined BUCKETS_128
-#define EFF_BUCKETS 128
-#define CODE_SIZE 32 // 128 * 2 bits = 32 bytes
-#if defined CHECKSUM_3B
-#define INTERNAL_TLSH_STRING_LEN 74
-#define TLSH_CHECKSUM_LEN 3
-// defined in tlsh.h   #define TLSH_STRING_LEN   74   // 2 + 3 + 32 bytes = 74 hexidecimal chars
 #else
-#define INTERNAL_TLSH_STRING_LEN 70
-#define TLSH_CHECKSUM_LEN 1
-// defined in tlsh.h   #define TLSH_STRING_LEN   70   // 2 + 1 + 32 bytes = 70 hexidecimal chars
+#error "invalid bucket size"
 #endif
 
-#elif defined BUCKETS_48
-#define INTERNAL_TLSH_STRING_LEN 33
-#define EFF_BUCKETS 48
-#define CODE_SIZE 12 // 48 * 2 bits = 12 bytes
-#define TLSH_CHECKSUM_LEN 1
-// defined in tlsh.h   #define TLSH_STRING_LEN   30   // 2 + 1 + 12 bytes = 30 hexidecimal chars
-#else
-#error "invalid bucket"
-#endif
+#define EFF_BUCKETS NB_TLSH_BUCKETS
+#define CODE_SIZE ((NB_TLSH_BUCKETS << 1) >> 3) // (NB_TLSH_BUCKETS * 2 bits) in bytes
+#define TLSH_CHECKSUM_LEN (TLSH_CHECKSUM)
+#define INTERNAL_TLSH_STRING_LEN (((2 + TLSH_CHECKSUM) + TLS_BLOCK_GRANULARITY) * 2)
+#define TLSH_STRING_LEN (INTERNAL_TLSH_STRING_LEN)
 
 class TlshImpl
 {
@@ -94,8 +79,8 @@ public:
     }
 
 private:
-    unsigned int *a_bucket;
-    unsigned char slide_window[SLIDING_WND_SIZE];
+    std::unique_ptr<u32[]> a_bucket;
+    std::array<u8, SLIDING_WND_SIZE> slide_window;
     unsigned int data_len;
 
     struct lsh_bin_struct

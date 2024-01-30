@@ -15,34 +15,23 @@
 #define TLSH_OPTION_THREADED 16
 
 
-// Define TLSH_STRING_LEN_REQ, which is the string length of "T1" + the hex value of the Tlsh hash.
-// BUCKETS_256 & CHECKSUM_3B are compiler switches defined in CMakeLists.txt
-#if defined BUCKETS_256
+#if NB_TLSH_BUCKETS == 256
 #define TLSH_STRING_LEN_REQ 136
-// changed the minimum data length to 256 for version 3.3
 #define MIN_DATA_LENGTH 50
-// added the -force option for version 3.5
-// added the -conservatibe option for version 3.17
 #define MIN_CONSERVATIVE_DATA_LENGTH 256
 
-#elif defined BUCKETS_128
+#elif NB_TLSH_BUCKETS == 128
 #define TLSH_STRING_LEN_REQ 72
-// changed the minimum data length to 256 for version 3.3
 #define MIN_DATA_LENGTH 50
-// added the -force option for version 3.5
-// added the -conservatibe option for version 3.17
 #define MIN_CONSERVATIVE_DATA_LENGTH 256
 
-#elif defined BUCKETS_48
-// No 3 Byte checksum option for 48 Bucket min hash
+#elif NB_TLSH_BUCKETS == 48
 #define TLSH_STRING_LEN 30
-// changed the minimum data length to 256 for version 3.3
 #define MIN_DATA_LENGTH 10
-// added the -force option for version 3.5
 #define MIN_CONSERVATIVE_DATA_LENGTH 10
 
 #else
-#error "Invalid bucket"
+#error "Invalid bucket size"
 #endif
 
 #define TLSH_STRING_BUFFER_LEN (TLSH_STRING_LEN_REQ + 1)
