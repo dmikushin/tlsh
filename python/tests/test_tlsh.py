@@ -1,10 +1,11 @@
 import pathlib
+import hashlib
 import random
 
 
 CURFILE = pathlib.Path(__file__)
 CURDIR = CURFILE.parent
-TEST_DATA_PATH = CURDIR / "../../tests/datasets"
+TEST_DATA_PATH = (CURDIR / "../../tests/datasets").absolute()
 
 
 def rand(n: int):
@@ -59,3 +60,81 @@ def test_batch_test_base():
         assert tlsh_raw == bytes.fromhex(
             expected_value
         ), f"Mismatch on {fname}: expected={tlsh_raw}  got={bytes.fromhex(expected_value)}"
+
+
+def test_batch_test_extended_file_level():
+    tlsh = __import__("tlsh")
+    test_dir = TEST_DATA_PATH / "extended/samples"
+    expected_value_matrix = [
+        (
+            test_dir / "c/bin/code_share.x64",
+            "f606b57f08198a84aaf6df04757aaee1552d969be66e0be1a61f2c2a6e4c090b",
+            "B0524126A7A1CF3EDD3893B804A74631A2B67898A37522372755B7342F933544AA34C9",
+        ),
+        (
+            test_dir / "c/bin/code_share2.x64",
+            "11d5959efb6829761d561e194a3139137a9a9bebe5e265b616d8aa24808ec5c1",
+            "04525016A7A1CE7EDD38A3B804A74230A2B67898A3762337265577342F533548EA35C9",
+        ),
+        (
+            test_dir / "c/bin/main_arm",
+            "7a34f72c372a07a9bdc97954f130606a40b56762c7a8912eb1d642a6c97b506a",
+            "4E63EAA5FB85DD6BE462973488D783B0B372E954A76343533A18A3786E037D40E6218A",
+        ),
+        (
+            test_dir / "c/bin/main_x86",
+            "f675790b051af32e8929c138286c7a35fbdd764154c03b327a8ca9b8ab0a8ab0",
+            "06525203B3AA8A3BD9941B7804934330F1FBE45093B3872F1B25B3741E413A45D3BA6A",
+        ),
+        (
+            test_dir / "c/bin/main_x86-32",
+            "d77b9c297a7e5a2c2d04338717e757a79c4e9464dcc4d6b441f8384f042b019e",
+            "07627207B36AC937D894177C059B8724B1B7E43097B3472B2729B3A41D423A86D3FB5A",
+        ),
+        (
+            test_dir / "c/bin/main_x86_64",
+            "dbff8b77aa93e92cdf7b97fddb0f518d8507ccfffeac018b45d66836c6969875",
+            "8652344BBB60CF7ACC68137844A74730B2BAF85462A153232B55B3340E937949F575EA",
+        ),
+        (
+            test_dir / "c/bin/version1.arm",
+            "e95c3b940be8bc45a58068e86581b9108bb18a23de66357c3f5ab9157b2d2484",
+            "2863C78AF981EE9BE4C1B334889753E0737AD81943226303750DE3796F93BC55EAB185",
+        ),
+        (
+            test_dir / "c/bin/version1.x64",
+            "3307eaab7c5f6e831ba233936f2220ba31ba82280c1106c3dd36cde8a2fbf64f",
+            "F852D71AFBA1C9BEDCBCD3F484A70230B2B67D625376613B265076391F533805A138E8",
+        ),
+        (
+            test_dir / "c/bin/version2.arm",
+            "7b0bc23eb57fe7fd0e09b8115c3a5fa8768df41b9e2a671e36851bda1c71e83c",
+            "3563D78AF981DE8BE4C1E330889753E0737BE859432263037609D3796F93BC55EAA184",
+        ),
+        (
+            test_dir / "c/bin/version2.x64",
+            "d2955fd2a886f4ab7e9249b9b933c9830cc8779c880c022c371420077005aa10",
+            "5452D81AFBA1C9BEDCFCD3F484A70230A2B67962137A713B265466351F533805B538E5",
+        ),
+        (
+            test_dir / "c/bin/version3.arm",
+            "58e660b3f850f43b94c9d37577f5725f36f98ab4aca8d605872472f0e214f290",
+            "CD63F78BF981DD9BE481E33488D753F07376E819472223037649E3796F93BC59EAA084",
+        ),
+        (
+            test_dir / "c/bin/version3.x64",
+            "30c5d196188ff76784e7272bad8ef6f249a61d63318e10d274f06dcbca1e48fe",
+            "5F52FA2AFBA1C9BDDCBCE3F484570170B2B6786153B6623B269467341F933445A538E8",
+        ),
+        (
+            test_dir / "c/bin/version4.x64",
+            "92f8041d84316754342983b9685a862ffa97612c9cdc0e6ee03b77b256112e3e",
+            "DA52C81AFBA2C9BEDDBCD3F484A74230A2B63D6213766137269476381F533405B538E5",
+        ),
+    ]
+
+    for fpath, sha2val, tlshval in expected_value_matrix:
+        assert fpath.exists()
+        buf = fpath.open("rb").read()
+        assert hashlib.sha256(buf).digest() == bytes.fromhex(sha2val)
+        assert tlsh.hexdigest(buf) == tlshval
