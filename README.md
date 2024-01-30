@@ -1,10 +1,13 @@
 # TLSH
 
+[![Build](https://github.com/calladoum-elastic/tlsh/actions/workflows/build.yml/badge.svg)](https://github.com/calladoum-elastic/tlsh/actions/workflows/build.yml)
+[![Test](https://github.com/calladoum-elastic/tlsh/actions/workflows/test.yml/badge.svg)](https://github.com/calladoum-elastic/tlsh/actions/workflows/test.yml)
+
 ## Build
 
 ### Build & Install the C++ library
 
-Requires cmake (>= 3.20), and a C++20-compatible compiler.
+**Requires** `cmake` (>= 3.20), and a C++20-compatible compiler.
 
 ```
 cmake -S . -B ./build
@@ -13,6 +16,8 @@ cmake --install ./build --config RelWithDebInfo
 ```
 
 ### Build & Install the Python bindings
+
+**Requires** Python3.8+
 
 Install requirements, then the package (also requires cmake and a C++ compiler)
 
