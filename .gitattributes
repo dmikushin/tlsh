@@ -1,4 +1,2 @@
 *.sh eol=lf
-Testing/example_data/*  binary
-Testing/example_data_variants/*  binary
-Testing/example_data/exp/*  binary
+tests/dataset/*  binary
