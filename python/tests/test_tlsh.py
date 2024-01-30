@@ -45,7 +45,7 @@ def test_batch_test():
     tlsh = __import__("tlsh")
     expected_values = [
         x.strip().split(maxsplit=1)
-        for x in (TEST_DATA_PATH / "expected.txt").open().readlines()
+        for x in (TEST_DATA_PATH / "base_dataset.txt").open().readlines()
     ]
 
     for fname, expected_value in expected_values:
