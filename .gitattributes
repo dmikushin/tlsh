@@ -1,2 +1,2 @@
 *.sh eol=lf
-tests/dataset/*  binary
+tests/datasets/*  binary
