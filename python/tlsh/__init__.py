@@ -2,7 +2,7 @@
 Wrapper module for the native `_tlsh` module
 """
 from typing import Optional, Union
-from ._tlsh import Tlsh as _Tlsh  # type: ignore
+from ._tlsh import Tlsh as _Tlsh  # pylint: disable=import-error
 
 
 class Tlsh:
@@ -45,7 +45,7 @@ class Tlsh:
         """Reset the internal buffer used for TLSH computation."""
         self._tlsh_obj.reset()
 
-    def fromTlshStr(self, tlsh_str: str) -> None:
+    def load(self, tlsh_str: str) -> None:
         """Load a TLSH hash from a string"""
         self._tlsh_obj.fromTlshStr(tlsh_str)
 
@@ -69,11 +69,11 @@ def digest(buffer: bytes) -> bytes:
     return t.digest()
 
 
-def diff(h1: str, h2: str) -> int:
+def diff(str1: str, str2: str) -> int:
     """Helper function to quickly calculate the TLSH score between two TLSH
     hashes."""
     t1 = Tlsh()
-    t1.fromTlshStr(h1)
+    t1.load(str1)
     t2 = Tlsh()
-    t2.fromTlshStr(h2)
+    t2.load(str2)
     return t1.diff(t2)
