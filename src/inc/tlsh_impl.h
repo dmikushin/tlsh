@@ -2,6 +2,8 @@
 
 #include <array>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "tlsh_version.h"
 
@@ -47,13 +49,13 @@ public:
     final(int fc_cons_option = 0);
     void
     reset();
-    const char *
-    hash(int showvers) const;
-    const char *
-    hash(char *buffer,
-        unsigned int bufSize,
-        int showvers) const; // saves allocating hash string in TLSH instance - bufSize should be
-                             // TLSH_STRING_LEN + 1
+    std::vector<u8> const &
+    hash(u8 showvers) const;
+
+    std::vector<u8> const &
+    hash(std::vector<u8> &,
+        u8 showvers) const; // saves allocating hash string in TLSH instance - bufSize should be
+                            // TLSH_STRING_LEN + 1
     int
     compare(const TlshImpl &other) const;
     int
@@ -71,7 +73,7 @@ public:
     int
     HistogramCount(int bucket);
     int
-    fromTlshStr(const char *str);
+    fromTlshStr(std::string const &str);
     bool
     isValid() const
     {
@@ -107,7 +109,7 @@ private:
         unsigned char tmp_code[CODE_SIZE]; // 32/64 bytes
     } lsh_bin;
 
-    mutable char *lsh_code; // allocated when hash() function without buffer is called - 70/134
-                            // bytes or 74/138 bytes
-    bool lsh_code_valid;    // true iff final() or fromTlshStr complete successfully
+    mutable std::vector<u8> lsh_code; // allocated when hash() function without buffer is
+                                      // called - 70/134 bytes or 74/138 bytes
+    bool lsh_code_valid;              // true iff final() or fromTlshStr complete successfully
 };

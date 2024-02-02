@@ -3,7 +3,7 @@
  * Users may opt to use either license depending on the license
  * restictions of the systems with which they plan to integrate
  * the TLSH code.
- */ 
+ */
 
 /* ==============
  * Apache License
@@ -62,7 +62,7 @@ unsigned char b_mapping(unsigned char salt, unsigned char i, unsigned char j, un
 unsigned char l_capturing(unsigned int len);
 int mod_diff(unsigned int x, unsigned int y, unsigned int R);
 int h_distance( int len, const unsigned char x[], const unsigned char y[]);
-void to_hex( unsigned char * psrc, int len, char* pdest);
+void to_hex( u8 * psrc, int len, u8* pdest);
 void from_hex( const char* psrc, int len, unsigned char* pdest);
 unsigned char swap_byte( const unsigned char in );
 

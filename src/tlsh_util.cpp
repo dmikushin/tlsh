@@ -2644,7 +2644,7 @@ swap_byte(const unsigned char in)
 }
 
 void
-to_hex(unsigned char *psrc, int len, char *pdest)
+to_hex(u8 *psrc, int len, u8 *pdest)
 {
     static unsigned char HexLookup[513] = {
         "000102030405060708090A0B0C0D0E0F"

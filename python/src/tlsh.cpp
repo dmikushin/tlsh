@@ -25,5 +25,6 @@ NB_MODULE(_tlsh, m)
         .def("isValid", &Tlsh::isValid)
         .def("totalDiff", &Tlsh::totalDiff)
         .def("fromTlshStr", &Tlsh::fromTlshStr)
-        .def_ro_static("version", &Tlsh::version);
+        .def_ro_static("version", &Tlsh::version)
+        .def_ro_static("version_info", &Tlsh::version_info);
 }

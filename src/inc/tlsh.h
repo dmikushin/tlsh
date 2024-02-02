@@ -14,7 +14,6 @@
 #define TLSH_OPTION_PRIVATE 8
 #define TLSH_OPTION_THREADED 16
 
-
 #if NB_TLSH_BUCKETS == 256
 #define TLSH_STRING_LEN_REQ 136
 #define MIN_DATA_LENGTH 50
@@ -85,7 +84,7 @@ public:
 
     /* to get the hex-encoded hash code */
     const std::string
-    getHash(int showvers = 0) const;
+    getHash(u8 showvers = 0) const;
 
     /* to get the hex-encoded hash code without allocating buffer in TlshImpl - bufSize should be
      * TLSH_STRING_BUFFER_LEN */
@@ -139,6 +138,8 @@ public:
         STR(TLSH_VERSION_MAJOR) "." STR(TLSH_VERSION_MINOR) "." STR(TLSH_VERSION_PATCH) " " STR(
             TLSH_HASH) ", " STR(TLSH_CHECKSUM) " byte checksum, sliding_window=" STR(SLIDING_WND_SIZE);
 
+    static inline std::array<u8, 5> version_info = {TLSH_VERSION_MAJOR, TLSH_VERSION_MINOR,
+        TLSH_VERSION_PATCH, TLSH_CHECKSUM, SLIDING_WND_SIZE};
 
     std::unique_ptr<TlshImpl> const &
     impl() const

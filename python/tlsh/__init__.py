@@ -1,6 +1,7 @@
 """
 Wrapper module for the native `_tlsh` module
 """
+from collections import namedtuple
 from typing import Optional, Union
 from ._tlsh import Tlsh as _Tlsh  # pylint: disable=import-error
 
@@ -28,14 +29,15 @@ class Tlsh:
         _buffer = buffer if isinstance(buffer, bytearray) else bytearray(buffer)
         self._tlsh_obj.final(_buffer, 0)
 
-    def hexdigest(self) -> str:
+    def hexdigest(self, ver: int = 0) -> str:
         """Once finalized, output the TLSH hash as a hex-string"""
-        assert bool(self)
-        return str(self._tlsh_obj.getHash(0))
+        assert bool(self), "Invalid state"
+        assert 0 <= ver < 10, "Invalid version"
+        return str(self._tlsh_obj.getHash(ver))
 
-    def digest(self) -> bytes:
+    def digest(self, ver: int = 0) -> bytes:
         """Once finalized, output the TLSH hash as bytes"""
-        return bytes.fromhex(self.hexdigest())
+        return bytes.fromhex(self.hexdigest(ver))
 
     def diff(self, other: "Tlsh", different_length: bool = True) -> int:
         """Calculate the score between with another TLSH object"""
@@ -51,6 +53,11 @@ class Tlsh:
 
 
 version: str = _Tlsh().version
+ModuleVersionInfo = namedtuple(
+    "version_info",
+    ["major", "minor", "patch", "checksum_granularity", "window_slide_size"],
+)
+version_info = ModuleVersionInfo(*_Tlsh().version_info)
 
 
 def hexdigest(buffer: bytes) -> str:

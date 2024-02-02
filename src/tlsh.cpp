@@ -147,9 +147,10 @@ Tlsh::final(std::vector<u8> const &data, u32 tlsh_option)
 }
 
 const std::string
-Tlsh::getHash(int showvers) const
+Tlsh::getHash(u8 showvers) const
 {
-    return m_Implementation->hash(showvers);
+    auto const &res = m_Implementation->hash(showvers);
+    return std::string((char*)res.data(), res.size());
 }
 
 // const char *
@@ -234,7 +235,7 @@ Tlsh::totalDiff(const Tlsh &other, bool len_diff) const
 int
 Tlsh::fromTlshStr(const std::string &str)
 {
-    return m_Implementation->fromTlshStr(str.data());
+    return m_Implementation->fromTlshStr(str);
 }
 
 bool

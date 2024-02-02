@@ -72,6 +72,8 @@
 #define RANGE_LVALUE 256
 #define RANGE_QRATIO 16
 
+static_assert(CODE_SIZE > 0);
+
 static void
 find_quartile(unsigned int *q1, unsigned int *q2, unsigned int *q3, const unsigned int *a_bucket);
 static unsigned int
@@ -79,7 +81,7 @@ partition(unsigned int *buf, unsigned int left, unsigned int right);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TlshImpl::TlshImpl() : a_bucket(NULL), data_len(0), lsh_code(NULL), lsh_code_valid(false)
+TlshImpl::TlshImpl() : a_bucket{nullptr}, data_len{0}, lsh_code{}, lsh_code_valid{false}
 {
     memset(this->slide_window.data(), 0, sizeof(this->slide_window.size()));
     memset(&this->lsh_bin, 0, sizeof(this->lsh_bin));
@@ -89,7 +91,6 @@ TlshImpl::TlshImpl() : a_bucket(NULL), data_len(0), lsh_code(NULL), lsh_code_val
 
 TlshImpl::~TlshImpl()
 {
-    delete[] this->lsh_code;
 }
 
 void
@@ -97,8 +98,10 @@ TlshImpl::reset()
 {
     this->a_bucket.reset();
     memset(this->slide_window.data(), 0, sizeof(this->slide_window.size()));
-    delete[] this->lsh_code;
-    this->lsh_code = NULL;
+
+    this->lsh_code.clear();
+    this->lsh_code.resize(0);
+
     memset(&this->lsh_bin, 0, sizeof(this->lsh_bin));
     this->data_len       = 0;
     this->lsh_code_valid = false;
@@ -107,7 +110,7 @@ TlshImpl::reset()
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Pearson's sample random table
-static unsigned char v_table[256] = {1, 87, 49, 12, 176, 178, 102, 166, 121, 193, 6, 84, 249, 230,
+static std::array<u8, 256> v_table = {1, 87, 49, 12, 176, 178, 102, 166, 121, 193, 6, 84, 249, 230,
     44, 163, 14, 197, 213, 181, 161, 85, 218, 80, 64, 239, 24, 226, 236, 142, 38, 200, 110, 177,
     104, 103, 141, 253, 255, 50, 77, 101, 81, 18, 45, 96, 31, 222, 25, 107, 190, 70, 86, 237, 240,
     34, 72, 242, 20, 214, 244, 227, 149, 235, 97, 234, 57, 22, 60, 250, 82, 175, 208, 5, 127, 199,
@@ -121,7 +124,7 @@ static unsigned char v_table[256] = {1, 87, 49, 12, 176, 178, 102, 166, 121, 193
     180, 117, 76, 140, 36, 210, 172, 41, 54, 159, 8, 185, 232, 113, 196, 231, 47, 146, 120, 51, 65,
     28, 144, 254, 221, 93, 189, 194, 139, 112, 43, 71, 109, 184, 209};
 
-static unsigned char v_table48[256] = {
+static std::array<u8, 256> v_table48 = {
     1,
     39,
     1,
@@ -439,7 +442,7 @@ TlshImpl::update(const unsigned char *data, unsigned int len, int tlsh_option)
 
     unsigned int fed_len = this->data_len;
 
-    if (this->a_bucket == NULL)
+    if (this->a_bucket == nullptr)
     {
         this->a_bucket = std::make_unique<u32[]>(BUCKETS);
         memset(this->a_bucket.get(), 0, sizeof(int) * BUCKETS);
@@ -1163,11 +1166,16 @@ TlshImpl::final(int fc_cons_option)
 }
 
 int
-TlshImpl::fromTlshStr(const char *str)
+TlshImpl::fromTlshStr(std::string const &str)
 {
+    if (str.size() < 2)
+    {
+        return 1;
+    }
+
     // Assume that we have 128 Buckets
     int start = 0;
-    if (strncmp(str, "T1", 2) == 0)
+    if (str.substr(0, 2) == "T1")
     {
         start = 2;
     }
@@ -1215,17 +1223,27 @@ TlshImpl::fromTlshStr(const char *str)
     return 0;
 }
 
-const char *
-TlshImpl::hash(char *buffer, unsigned int bufSize, int showvers) const
+
+std::vector<u8> const &
+TlshImpl::hash(std::vector<u8> &buffer, u8 showvers) const
 {
-    if (bufSize < TLSH_STRING_LEN_REQ + 1)
+    const size_t bufSize = buffer.size();
+
+    // Insufficient buffer
+    if (bufSize != TLSH_STRING_LEN_REQ)
     {
-        strncpy(buffer, "", bufSize);
+        // strncpy(&buffer[0], "", bufSize);
+        buffer.clear();
+        buffer.resize(0);
         return buffer;
     }
+
+    // Invalid state
     if (this->lsh_code_valid == false)
     {
-        strncpy(buffer, "", bufSize);
+        // strncpy(&buffer[0], "", bufSize);
+        buffer.clear();
+        buffer.resize(0);
         return buffer;
     }
 
@@ -1241,7 +1259,7 @@ TlshImpl::hash(char *buffer, unsigned int bufSize, int showvers) const
         tmp.tmp_code[i] = (this->lsh_bin.tmp_code[CODE_SIZE - 1 - i]);
     }
 
-    if (showvers)
+    if (0 < showvers && showvers < 10)
     {
         buffer[0] = 'T';
         buffer[1] = '0' + showvers;
@@ -1249,25 +1267,26 @@ TlshImpl::hash(char *buffer, unsigned int bufSize, int showvers) const
     }
     else
     {
-        to_hex((unsigned char *)&tmp, sizeof(tmp), buffer);
+        buffer.resize(bufSize - 2);
+        to_hex((unsigned char *)&tmp, sizeof(tmp), &buffer[0]);
     }
     return buffer;
 }
 
 /* to get the hex-encoded hash code */
-const char *
-TlshImpl::hash(int showvers) const
+std::vector<u8> const &
+TlshImpl::hash(u8 showvers) const
 {
-    if (this->lsh_code != NULL)
+    if (this->lsh_code.size())
     {
         // lsh_code has been previously calculated, so just return it
         return this->lsh_code;
     }
 
-    this->lsh_code = new char[TLSH_STRING_LEN_REQ + 1];
-    memset(this->lsh_code, 0, TLSH_STRING_LEN_REQ + 1);
+    this->lsh_code.resize(TLSH_STRING_LEN_REQ);
+    ::memset(this->lsh_code.data(), 0, TLSH_STRING_LEN_REQ);
 
-    return hash(this->lsh_code, TLSH_STRING_LEN_REQ + 1, showvers);
+    return hash(this->lsh_code, showvers);
 }
 
 
@@ -1385,7 +1404,7 @@ TlshImpl::BucketValue(int bucket)
 int
 TlshImpl::HistogramCount(int bucket)
 {
-    if (this->a_bucket == NULL)
+    if (this->a_bucket == nullptr)
         return (-1);
     return (this->a_bucket[EFF_BUCKETS - 1 - bucket]);
 }

@@ -2,6 +2,7 @@ import pathlib
 import hashlib
 import random
 
+import tlsh
 
 CURFILE = pathlib.Path(__file__)
 CURDIR = CURFILE.parent
@@ -12,12 +13,20 @@ def rand(n: int):
     return bytearray([random.randint(0, 255) for x in range(n)])
 
 
-def test_import_module():
-    assert __import__("tlsh")
+def test_module_version():
+    assert isinstance(tlsh.version, str) and tlsh.version
+    assert isinstance(tlsh.version_info, tlsh.ModuleVersionInfo)
+    assert isinstance(tlsh.version_info.major, int)
+    assert isinstance(tlsh.version_info.minor, int)
+    assert isinstance(tlsh.version_info.patch, int)
+    assert isinstance(tlsh.version_info.checksum_granularity, int)
+    assert isinstance(tlsh.version_info.window_slide_size, int)
+
+    assert tlsh.version_info.checksum_granularity in (1, 3)
+    assert tlsh.version_info.window_slide_size == 5
 
 
 def test_basic_test():
-    tlsh = __import__("tlsh")
     buf = rand(1024)
 
     hexval = tlsh.hexdigest(buf)
