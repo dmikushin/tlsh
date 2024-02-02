@@ -52,7 +52,6 @@ def test_basic_test():
 
 
 def test_batch_test_base():
-    tlsh = __import__("tlsh")
     expected_values = [
         x.strip().split(maxsplit=1)
         for x in (TEST_DATA_PATH / "base.txt").open().readlines()
@@ -72,7 +71,6 @@ def test_batch_test_base():
 
 
 def test_batch_test_extended_file_level():
-    tlsh = __import__("tlsh")
     test_dir = TEST_DATA_PATH / "extended/samples"
     expected_value_matrix = [
         (
