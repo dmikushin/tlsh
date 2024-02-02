@@ -44,30 +44,25 @@ else()
     message(FATAL_ERROR "Invalid OS")
  endif()
 
-# set(TLSH_SRCS tlsh.cpp tlsh_impl.cpp tlsh_util.cpp input_desc.cpp shared_file_functions.cpp)
-# add_library(tlsh_static STATIC ${TLSH_SRCS})
-# target_link_libraries(tlsh_static PRIVATE)
-# set_target_properties(tlsh_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-# set_target_properties(tlsh_static PROPERTIES OUTPUT_NAME tlsh${BUILD_POSTFIX})
+#
+# Build with ASAN if available AND debug build
+#
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-fsanitize=address" HAS_ASAN_AVAILABLE)
 
-# if (NOT DEFINED TLSH_SHARED_LIBRARY)
-#     set(TLSH_SHARED_LIBRARY 0)
-# endif()
-
-# if(TLSH_SHARED_LIBRARY EQUAL 1)
-#     add_library(tlsh_shared SHARED ${TLSH_SRCS})
-#     target_link_libraries(tlsh_shared PRIVATE)
-#     set_target_properties(tlsh_shared PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-#     set_target_properties(tlsh_shared PROPERTIES OUTPUT_NAME tlsh${BUILD_POSTFIX})
-#     set_target_properties(tlsh_shared PROPERTIES VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
-#                                                  SOVERSION "${VERSION_MAJOR}")
-# endif()
-
-# if(TLSH_SHARED_LIBRARY)
-#     install(TARGETS tlsh_static tlsh_shared DESTINATION lib)
-# else()
-#     install(TARGETS tlsh_static             DESTINATION lib)
-# endif()
+if(HAS_ASAN_AVAILABLE)
+    message(STATUS "Found Address Sanitizer")
+    target_compile_definitions(tlsh
+    PUBLIC
+        $<$<CONFIG:Debug>:_DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION >
+    )
+    target_compile_options(tlsh
+    PUBLIC
+        $<$<CONFIG:Debug>:-fsanitize=address>
+    )
+else()
+    message(STATUS "Address Sanitizer not found")
+endif(HAS_ASAN_AVAILABLE)
 
 install(TARGETS tlsh DESTINATION lib)
 
