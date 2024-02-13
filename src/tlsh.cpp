@@ -238,6 +238,12 @@ Tlsh::fromTlshStr(const std::string &str)
     return m_Implementation->fromTlshStr(str);
 }
 
+int
+Tlsh::fromTlshBytes(const std::vector<u8> &bytes)
+{
+    return m_Implementation->fromTlshBytes(bytes);
+}
+
 bool
 Tlsh::isValid() const
 {

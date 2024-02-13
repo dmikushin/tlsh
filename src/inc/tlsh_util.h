@@ -58,13 +58,24 @@
 #ifndef HEADER_TLSH_UTIL_H
 #define HEADER_TLSH_UTIL_H
 
-unsigned char b_mapping(unsigned char salt, unsigned char i, unsigned char j, unsigned char k);
-unsigned char l_capturing(unsigned int len);
-int mod_diff(unsigned int x, unsigned int y, unsigned int R);
-int h_distance( int len, const unsigned char x[], const unsigned char y[]);
-void to_hex( u8 * psrc, int len, u8* pdest);
-void from_hex( const char* psrc, int len, unsigned char* pdest);
-unsigned char swap_byte( const unsigned char in );
+unsigned char
+b_mapping(unsigned char salt, unsigned char i, unsigned char j, unsigned char k);
+unsigned char
+l_capturing(unsigned int len);
+int
+mod_diff(unsigned int x, unsigned int y, unsigned int R);
+int
+h_distance(int len, const unsigned char x[], const unsigned char y[]);
+void
+to_hex(u8 *psrc, int len, u8 *pdest);
+void
+from_hex(const u8 *psrc, size_t srclen, u8 *pdest, size_t dstlen);
+unsigned char
+swap_byte(const unsigned char in);
+
+#ifdef __cplusplus
+bool
+from_hex(std::vector<u8> const &psrc, std::vector<u8> &pdest);
+#endif // __cplusplus
 
 #endif
-

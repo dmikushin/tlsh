@@ -1,6 +1,7 @@
 """
 Wrapper module for the native `_tlsh` module
 """
+
 from collections import namedtuple
 from typing import Optional, Union
 from ._tlsh import Tlsh as _Tlsh  # pylint: disable=import-error
@@ -37,7 +38,10 @@ class Tlsh:
 
     def digest(self, ver: int = 0) -> bytes:
         """Once finalized, output the TLSH hash as bytes"""
-        return bytes.fromhex(self.hexdigest(ver))
+        res = self.hexdigest()
+        if ver:
+            return b"T%d" % ver + bytes.fromhex(res[2:])
+        return bytes.fromhex(res)
 
     def diff(self, other: "Tlsh", different_length: bool = True) -> int:
         """Calculate the score between with another TLSH object"""
@@ -47,9 +51,13 @@ class Tlsh:
         """Reset the internal buffer used for TLSH computation."""
         self._tlsh_obj.reset()
 
-    def load(self, tlsh_str: str) -> None:
-        """Load a TLSH hash from a string"""
-        self._tlsh_obj.fromTlshStr(tlsh_str)
+    def load(self, tlsh_input: Union[str, bytes]) -> bool:
+        """Load a TLSH hash from a string or bytes"""
+        if isinstance(tlsh_input, str):
+            return self._tlsh_obj.fromTlshStr(tlsh_input) == 0
+        if isinstance(tlsh_input, bytes):
+            return self._tlsh_obj.fromTlshBytes(bytearray(tlsh_input)) == 0
+        raise TypeError
 
 
 version: str = _Tlsh().version
@@ -60,27 +68,27 @@ ModuleVersionInfo = namedtuple(
 version_info = ModuleVersionInfo(*_Tlsh().version_info)
 
 
-def hexdigest(buffer: bytes) -> str:
+def hexdigest(buffer: bytes, ver: int = 0) -> str:
     """Helper function to quickly calculate the TLSH hash of a block of bytes
     and output the result to an hex-string."""
     t = Tlsh(buffer)
     t.final()
-    return t.hexdigest()
+    return t.hexdigest(ver)
 
 
-def digest(buffer: bytes) -> bytes:
+def digest(buffer: bytes, ver: int = 0) -> bytes:
     """Helper function to quickly calculate the TLSH hash of a block of bytes
     and output the result to an array of bytes."""
     t = Tlsh(buffer)
     t.final()
-    return t.digest()
+    return t.digest(ver)
 
 
-def diff(str1: str, str2: str) -> int:
+def diff(str1: Union[str, bytes], str2: Union[str, bytes]) -> int:
     """Helper function to quickly calculate the TLSH score between two TLSH
     hashes."""
     t1 = Tlsh()
-    t1.load(str1)
+    assert t1.load(str1)
     t2 = Tlsh()
-    t2.load(str2)
+    assert t2.load(str2)
     return t1.diff(t2)

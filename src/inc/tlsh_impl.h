@@ -42,9 +42,9 @@ public:
 
 public:
     void
-    update(const unsigned char *data, unsigned int len, int tlsh_option);
+    update(const u8 *data, unsigned int len, int tlsh_option);
     void
-    fast_update5(const unsigned char *data, unsigned int len, int tlsh_option);
+    fast_update5(const u8 *data, unsigned int len, int tlsh_option);
     void
     final(int fc_cons_option = 0);
     void
@@ -74,6 +74,10 @@ public:
     HistogramCount(int bucket);
     int
     fromTlshStr(std::string const &str);
+
+    int
+    fromTlshBytes(std::vector<u8> const &buf);
+
     bool
     isValid() const
     {
@@ -87,26 +91,26 @@ private:
 
     struct lsh_bin_struct
     {
-        unsigned char checksum[TLSH_CHECKSUM_LEN]; // 1 to 3 bytes
-        unsigned char Lvalue;                      // 1 byte
+        u8 checksum[TLSH_CHECKSUM_LEN]; // 1 to 3 bytes
+        u8 Lvalue;                      // 1 byte
         union
         {
 #if defined(__SPARC) || defined(_AIX)
 #pragma pack(1)
 #endif
-            unsigned char QB;
+            u8 QB;
             struct
             {
 #if defined(__SPARC) || defined(_AIX)
-                unsigned char Q2ratio : 4;
-                unsigned char Q1ratio : 4;
+                u8 Q2ratio : 4;
+                u8 Q1ratio : 4;
 #else
-                unsigned char Q1ratio : 4;
-                unsigned char Q2ratio : 4;
+                u8 Q1ratio : 4;
+                u8 Q2ratio : 4;
 #endif
             } QR;
         } Q;                               // 1 bytes
-        unsigned char tmp_code[CODE_SIZE]; // 32/64 bytes
+        u8 tmp_code[CODE_SIZE]; // 32/64 bytes
     } lsh_bin;
 
     mutable std::vector<u8> lsh_code; // allocated when hash() function without buffer is

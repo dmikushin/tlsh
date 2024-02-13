@@ -125,6 +125,9 @@ public:
     int
     fromTlshStr(const std::string &str);
 
+    int
+    fromTlshBytes(std::vector<u8> const& bytes);
+
     /* check if Tlsh object is valid to operate */
     bool
     isValid() const;

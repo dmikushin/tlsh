@@ -432,7 +432,7 @@ char k) { unsigned char h;
 #define RNG_IDX(i) ((i + RNG_SIZE) % RNG_SIZE)
 
 void
-TlshImpl::update(const unsigned char *data, unsigned int len, int tlsh_option)
+TlshImpl::update(const u8 *data, unsigned int len, int tlsh_option)
 {
     if (this->lsh_code_valid)
     {
@@ -445,7 +445,7 @@ TlshImpl::update(const unsigned char *data, unsigned int len, int tlsh_option)
     if (this->a_bucket == nullptr)
     {
         this->a_bucket = std::make_unique<u32[]>(BUCKETS);
-        memset(this->a_bucket.get(), 0, sizeof(int) * BUCKETS);
+        memset(this->a_bucket.get(), 0, sizeof(u32) * BUCKETS);
     }
 
 #if SLIDING_WND_SIZE == 5
@@ -670,7 +670,7 @@ thread2()
 }
 
 void
-TlshImpl::fast_update5(const unsigned char *data, unsigned int len, int tlsh_option)
+TlshImpl::fast_update5(const u8 *data, unsigned int len, int tlsh_option)
 {
 #ifdef THREADING_IMPLEMENTED
     if ((len >= 10000) && (tlsh_option & TLSH_OPTION_THREADED))
@@ -1202,10 +1202,18 @@ TlshImpl::fromTlshStr(std::string const &str)
         return 1;
     }
 
+    std::vector<u8> buf;
+    buf.assign(&str[start], &str[str.size() - start]);
+    return this->fromTlshBytes(buf);
+}
+
+int
+TlshImpl::fromTlshBytes(std::vector<u8> const &buf)
+{
     this->reset();
 
-    lsh_bin_struct tmp;
-    from_hex(&str[start], INTERNAL_TLSH_STRING_LEN, (unsigned char *)&tmp);
+    lsh_bin_struct tmp{};
+    from_hex(buf.data(), INTERNAL_TLSH_STRING_LEN, (unsigned char *)&tmp, sizeof(tmp));
 
     // Reconstruct checksum, Qrations & lvalue
     for (int k = 0; k < TLSH_CHECKSUM_LEN; k++)

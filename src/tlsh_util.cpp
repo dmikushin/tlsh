@@ -2676,9 +2676,9 @@ to_hex(u8 *psrc, int len, u8 *pdest)
 }
 
 void
-from_hex(const char *psrc, int len, unsigned char *pdest)
+from_hex(std::vector<u8> const &psrc, std::vector<u8> &pdest)
 {
-    static unsigned char DecLookup[] = {
+    static std::array<u8, 103> DecLookup = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // gap before first hex digit
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,       // 0123456789
@@ -2689,10 +2689,27 @@ from_hex(const char *psrc, int len, unsigned char *pdest)
         10, 11, 12, 13, 14, 15                 // abcdef
     };
 
-    for (int i = 0; i < len; i += 2)
+    if ((psrc.size() / 2) & 1)
+        return;
+
+    pdest.resize(psrc.size() / 2);
+
+    for (int i = 0, j = 0; i < psrc.size() - 1; i += 2, j++)
     {
-        unsigned d = DecLookup[*(unsigned char *)(psrc + i)] << 4;
-        d |= DecLookup[*(unsigned char *)(psrc + i + 1)];
-        *pdest++ = d;
+        const u8 hi = psrc[i] << 4;
+        const u8 lo = psrc[i + 1];
+        pdest[i]    = hi | lo;
     }
+}
+
+
+void
+from_hex(const u8 *psrc, size_t srclen, u8 *pdest, size_t dstlen)
+{
+    std::vector<u8> vecsrc;
+    std::vector<u8> vecdst;
+    vecsrc.assign(psrc, psrc+srclen);
+    vecdst.assign(pdest, pdest+dstlen);
+
+    from_hex(vecsrc, vecdst);
 }

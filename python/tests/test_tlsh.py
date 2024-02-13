@@ -1,16 +1,12 @@
 import pathlib
 import hashlib
-import random
+import os
 
 import tlsh
 
 CURFILE = pathlib.Path(__file__)
 CURDIR = CURFILE.parent
 TEST_DATA_PATH = (CURDIR / "../../tests/datasets").absolute()
-
-
-def rand(n: int):
-    return bytearray([random.randint(0, 255) for x in range(n)])
 
 
 def test_module_version():
@@ -27,12 +23,23 @@ def test_module_version():
 
 
 def test_basic_test():
-    buf = rand(1024)
+    buf = os.urandom(1024)
 
     hexval = tlsh.hexdigest(buf)
     assert isinstance(hexval, str)
+    assert not hexval.startswith("T")
+
     val = tlsh.digest(buf)
     assert isinstance(val, bytes)
+    assert not val.startswith(b"T")
+
+    hexval2 = tlsh.hexdigest(buf, 1)
+    assert isinstance(hexval2, str)
+    assert hexval2.startswith("T1")
+
+    val2 = tlsh.digest(buf, 1)
+    assert isinstance(val2, bytes)
+    assert val2.startswith(b"T1")
 
     for _ in range(100):
         a = tlsh.Tlsh()
@@ -49,6 +56,16 @@ def test_basic_test():
         assert val == a.digest()
         assert hexval == a.hexdigest()
         assert a.diff(b) == 0
+
+
+def test_validate_diff():
+    a_s = "4141414141414141414141414141414141414141414141414141414141414141414141"
+    a_b = b"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    b_s = "4141414141414141414141414141414141414141414141414141414141414141414142"
+    b_b = b"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB"
+    assert tlsh.diff(a_s, b_s) == tlsh.diff(a_b, b_b)
+    assert tlsh.diff(a_s, b_s) == tlsh.diff(a_s, b_b)
+    assert tlsh.diff(a_b, b_s) == tlsh.diff(a_s, b_b)
 
 
 def test_batch_test_base():
@@ -145,3 +162,12 @@ def test_batch_test_extended_file_level():
         buf = fpath.open("rb").read()
         assert hashlib.sha256(buf).digest() == bytes.fromhex(sha2val)
         assert tlsh.hexdigest(buf) == tlshval
+
+
+def test_perf_tlsh_load(benchmark):
+    result: int = benchmark(
+        tlsh.diff,
+        "DA52C81AFBA2C9BEDDBCD3F484A74230A2B63D6213766137269476381F533405B538E5",
+        "5F52FA2AFBA1C9BDDCBCE3F484570170B2B6786153B6623B269467341F933445A538E8",
+    )
+    assert isinstance(result, int)
