@@ -16,7 +16,14 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Natural Language :: English",
 ]
-dependencies = []
+dependencies = ["setuptools", "wheel", "nanobind"]
+
+[project.optional-dependencies]
+dev = ["black"]
+
+tests = ["pytest", "pytest-benchmark"]
+
+all = ["dev", "tests"]
 
 [project.urls]
 Homepage = "https://github.com/calladoum-elastic/tlsh"
@@ -29,3 +36,8 @@ wheel.py-api = "cp312"
 minimum-version = "0.4"
 build-dir = "build/{wheel_tag}"
 cmake.minimum-version = "3.20"
+
+# Uncomment for debug (+ASAN)
+# cmake.verbose = true
+# logging.level = "DEBUG"
+# cmake.build-type = "Debug"
