@@ -202,7 +202,7 @@ TlshImpl::update(const u8 *data, unsigned int len, int tlsh_option)
 
     unsigned int fed_len = this->data_len;
 
-    if (this->a_bucket == nullptr)
+    if (!this->a_bucket)
     {
         this->a_bucket = std::make_unique<u32[]>(BUCKETS);
         memset(this->a_bucket.get(), 0, sizeof(u32) * BUCKETS);
@@ -497,7 +497,7 @@ raw_fast_update5(
     unsigned int len,
     unsigned int fed_len,
     // outputs
-    unsigned int *a_bucket,
+    u32 *a_bucket,
     unsigned char *ret_checksum,
     unsigned char *slide_window)
 {
@@ -860,7 +860,7 @@ TlshImpl::final(int fc_cons_option)
     // issue #79 - divide by 0 if q3 == 0
     if (q3 == 0)
     {
-        this->a_bucket.release();
+        this->a_bucket = nullptr;
         return;
     }
 
@@ -916,7 +916,7 @@ TlshImpl::final(int fc_cons_option)
     if ((fc_cons_option & TLSH_OPTION_KEEP_BUCKET) == 0)
     {
         // Done with a_bucket so deallocate
-        this->a_bucket.release();
+        this->a_bucket = nullptr;
     }
 
     this->lsh_bin.Lvalue       = l_capturing(this->data_len);

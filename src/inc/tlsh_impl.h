@@ -109,7 +109,7 @@ private:
                 u8 Q2ratio : 4;
 #endif
             } QR;
-        } Q;                               // 1 bytes
+        } Q;                    // 1 bytes
         u8 tmp_code[CODE_SIZE]; // 32/64 bytes
     } lsh_bin;
 

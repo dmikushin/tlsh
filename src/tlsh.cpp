@@ -151,7 +151,9 @@ Tlsh::getHash(u8 showvers) const
 {
     auto const &res = m_Implementation->hash(showvers);
     if (res.size() == 0)
+    {
         return "";
+    }
     return std::string((char *)res.data(), res.size());
 }
 
