@@ -24,7 +24,7 @@ jobs:
           - {os: windows-2022,   arch: win32,    config: RelWithDebInfo}
           - {os: windows-2022,   arch: arm64,    config: RelWithDebInfo}
           - {os: windows-2022,   arch: arm,      config: RelWithDebInfo}
-          - {os: ubuntu-2204,    arch: x64,      config: RelWithDebInfo}
+          - {os: ubuntu-22.04,    arch: x64,      config: RelWithDebInfo}
           - {os: macos-13,       arch: x64,      config: Release}
         static: ["OFF", "ON"]
 
@@ -42,7 +42,7 @@ jobs:
         Invoke-VisualStudio2022${{ matrix.variants.arch }}
 
     - name: Setup environment variables (Linux)
-      if: matrix.variants.os == 'ubuntu-2204'
+      if: matrix.variants.os == 'ubuntu-22.04'
       run: |
         sudo apt remove llvm-* clang-* python3-lldb-* libunwind-* libc++abi1-* libc++1-*
         wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
@@ -69,7 +69,7 @@ jobs:
         cmake -S . -B ./build -A ${{ matrix.variants.arch }} ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
 
     - name: Initialize cmake (Linux)
-      if: matrix.variants.os == 'ubuntu-2204'
+      if: matrix.variants.os == 'ubuntu-22.04'
       run: |
         cmake -S . -B ./build ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
 
@@ -106,7 +106,7 @@ jobs:
         variant:
           - {os: windows-2022, arch: x64, config: RelWithDebInfo, py-arch: x64}
         #   - {os: windows-2022, arch: arm64, config: RelWithDebInfo, py-arch: x64} # Unsupported (see https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json)
-          - {os: ubuntu-2204, arch: x64, config: RelWithDebInfo, py-arch: x64}
+          - {os: ubuntu-22.04, arch: x64, config: RelWithDebInfo, py-arch: x64}
           - {os: macos-13, arch: x64, config: Release, py-arch: x64}
     runs-on: ${{ matrix.variant.os }}
     name: python${{ matrix.python-version }} / ${{ matrix.variant.os }} / ${{ matrix.python-version }} / ${{ matrix.variant.config }}
@@ -135,7 +135,7 @@ jobs:
         Invoke-VisualStudio2022${{ matrix.variant.arch }}
 
     - name: Environment Setup (Linux)
-      if: matrix.variant.os == 'ubuntu-2204'
+      if: matrix.variant.os == 'ubuntu-22.04'
       run: |
         echo "NB_CPU=$(grep -c ^processor /proc/cpuinfo)" >> $GITHUB_ENV
         sudo apt-get -y update
