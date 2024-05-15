@@ -1227,17 +1227,17 @@ TlshImpl::totalDiff(std::unique_ptr<TlshImpl> const &other, bool len_diff) const
     return (diff);
 }
 
-
+#ifdef __cplusplus
 #define SWAP_UINT(x, y) std::swap(x, y)
-
-// #define SWAP_UINT(x, y)                 \
-//     do                                  \
-//     {                                   \
-//         unsigned int int_tmp = (x);     \
-//         (x)                  = (y);     \
-//         (y)                  = int_tmp; \
-//     } while (0)
-
+#else
+#define SWAP_UINT(x, y)                 \
+    do                                  \
+    {                                   \
+        unsigned int int_tmp = (x);     \
+        (x)                  = (y);     \
+        (y)                  = int_tmp; \
+    } while (0)
+#endif
 
 void
 find_quartile(unsigned int *q1, unsigned int *q2, unsigned int *q3, const unsigned int *a_bucket)

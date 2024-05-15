@@ -61,4 +61,6 @@ install(
         inc
 )
 
-
+if(TLSH_BUILD_TESTS)
+    add_subdirectory(tests)
+endif(TLSH_BUILD_TESTS)

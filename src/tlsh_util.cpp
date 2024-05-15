@@ -2678,14 +2678,15 @@ to_hex(u8 *psrc, int len, u8 *pdest)
 void
 from_hex(std::vector<u8> const &psrc, std::vector<u8> &pdest)
 {
-    const static std::array<u8, 103> DecLookup = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // gap before first hex digit
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,       // 0123456789
-        0, 0, 0, 0, 0, 0, 0,                   // :;<=>?@ (gap)
+    const static std::array<i8, 103> DecLookup = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // gap before first hex digit
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,       // 0123456789
+        -1, -1, -1, -1, -1, -1, -1,                   // :;<=>?@ (gap)
         10, 11, 12, 13, 14, 15,                // ABCDEF
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // GHIJKLMNOPQRS (gap)
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // TUVWXYZ[/]^_` (gap)
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // GHIJKLMNOPQRS (gap)
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // TUVWXYZ[/]^_` (gap)
         10, 11, 12, 13, 14, 15                 // abcdef
     };
 
@@ -2699,8 +2700,13 @@ from_hex(std::vector<u8> const &psrc, std::vector<u8> &pdest)
 
     for (size_t i = 0, j = 0; i < psrc.size(); i += 2, j++)
     {
-        const u8 hi = DecLookup[psrc[i]] << 4;
-        const u8 lo = DecLookup[psrc[i + 1]];
+        if (DecLookup[psrc[i]] < 0 || DecLookup[psrc[i+1]] < 0)
+        {
+            pdest.clear();
+            return;
+        }
+        const u8 hi = (u8)(DecLookup[psrc[i]] << 4);
+        const u8 lo = (u8)(DecLookup[psrc[i + 1]]);
         pdest[j]    = hi | lo;
     }
 }
