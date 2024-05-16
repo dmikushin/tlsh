@@ -95,7 +95,7 @@ TEST_CASE("Evaluation", "[" NS "]")
         {
             t.reset();
             REQUIRE_FALSE(t.isValid());
-            std::vector<u8> inhex;
+            std::vector<u8> inhex, outhex;
             from_hex(std::vector<u8>(instr.cbegin(), instr.cend()), inhex);
             t.update(inhex);
             t.final();
@@ -111,7 +111,7 @@ TEST_CASE("Helpers", "[" NS "]")
 
 TEST_CASE("Conversion", "[" NS "]")
 {
-    SECTION("Normal test")
+    SECTION("from_hex")
     {
         const auto instr1 = "0123456789ABCDEF"sv;
         const std::vector<u8> in(instr1.cbegin(), instr1.cend());

@@ -7,7 +7,8 @@ list(APPEND TEST_SOURCE_FILES
     ${TEST_DIR}/test_basic.cpp
 
     # Performance tests
-    # TODO
+    ${TEST_DIR}/perf_basic.cpp
+
 )
 
 foreach(SOURCE_FILE ${TEST_SOURCE_FILES})
