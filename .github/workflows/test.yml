@@ -7,6 +7,19 @@ on:
       - completed
 
 jobs:
+  native_tests:
+    name: ${{ matrix.os }} / Library
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+    - run: cmake -S. -B build -DTLSH_BUILD_WITH_ASAN=ON -DTLSH_BUILD_TESTS=ON
+    - run: cmake --build
+    - run: ctest -j6 -C Debug -T test --output-on-failure --verbose
+
   binding_tests:
     name: ${{ matrix.os }} / Python${{ matrix.py }}
     strategy:
