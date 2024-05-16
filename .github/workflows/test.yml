@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: cmake -S. -B build -DTLSH_BUILD_WITH_ASAN=ON -DTLSH_BUILD_TESTS=ON -DTLSH_BUILD_BINDINGS=OFF
-    - run: cmake --build
+    - run: cmake --build ./build
     - run: ctest -j6 -C Debug -T test --output-on-failure --verbose
 
   binding_tests:
