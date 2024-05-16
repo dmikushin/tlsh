@@ -19,6 +19,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 option(TLSH_BUILD_STATIC "Build as static library instead of shared library" ON)
 option(TLSH_BUILD_BINDINGS "Build Python bindings" ON)
 option(TLSH_BUILD_TESTS "Build tests" OFF)
+option(TLSH_BUILD_WITH_ASAN "Build with Address Sanitizer" ON)
 
 # TLSH uses only half the counting buckets.
 # It can use all the buckets now.
@@ -56,6 +57,7 @@ if(TLSH_BUILD_BINDINGS)
 endif(TLSH_BUILD_BINDINGS)
 
 if(TLSH_BUILD_TESTS)
-    include(CTest)
-    find_package(Catch2 REQUIRED)
+  find_package(Catch2 REQUIRED)
+  include(CTest)
+  enable_testing()
 endif(TLSH_BUILD_TESTS)

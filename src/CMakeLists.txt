@@ -32,11 +32,7 @@ else()
 #
 # Build with ASAN if available AND debug build
 #
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-fsanitize=address" HAS_ASAN_AVAILABLE)
-
-if(HAS_ASAN_AVAILABLE)
-    message(STATUS "Found Address Sanitizer")
+if(BUILD_WITH_ASAN)
     target_compile_definitions(tlsh
     PUBLIC
         $<$<CONFIG:Debug>:_DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION >
@@ -45,9 +41,11 @@ if(HAS_ASAN_AVAILABLE)
     PUBLIC
         $<$<CONFIG:Debug>:-fsanitize=address>
     )
-else()
-    message(STATUS "Address Sanitizer not found")
-endif(HAS_ASAN_AVAILABLE)
+    target_link_libraries(tlsh
+    PUBLIC
+        $<$<CONFIG:Debug>:-fsanitize=address>
+    )
+endif(BUILD_WITH_ASAN)
 
 install(TARGETS tlsh DESTINATION lib)
 

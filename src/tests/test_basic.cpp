@@ -111,43 +111,40 @@ TEST_CASE("Helpers", "[" NS "]")
 
 TEST_CASE("Conversion", "[" NS "]")
 {
-    SECTION("Hex")
+    SECTION("Normal test")
     {
-        // Normal test
-        {
-            const auto instr1 = "0123456789ABCDEF"sv;
-            const std::vector<u8> in1(instr1.cbegin(), instr1.cend());
-            std::vector<u8> out1;
-            const std::vector<u8> res1{
-                0x01,
-                0x23,
-                0x45,
-                0x67,
-                0x89,
-                0xab,
-                0xcd,
-                0xef,
-            };
-            from_hex(in1, out1);
-            CHECK(out1 == res1);
-        }
+        const auto instr1 = "0123456789ABCDEF"sv;
+        const std::vector<u8> in(instr1.cbegin(), instr1.cend());
+        std::vector<u8> out;
+        const std::vector<u8> res{
+            0x01,
+            0x23,
+            0x45,
+            0x67,
+            0x89,
+            0xab,
+            0xcd,
+            0xef,
+        };
+        from_hex(in, out);
+        CHECK(out == res);
+    }
 
-        // Invalid size, valid hex format
-        {
-            const auto instr = "0123456789ABCDEF0"sv;
-            const std::vector<u8> in(instr.cbegin(), instr.cend());
-            std::vector<u8> out;
-            from_hex(in, out);
-            CHECK(out.size() == 0);
-        }
+    SECTION("Invalid size, valid hex format")
+    {
+        const auto instr = "0123456789ABCDEF0"sv;
+        const std::vector<u8> in(instr.cbegin(), instr.cend());
+        std::vector<u8> out;
+        from_hex(in, out);
+        CHECK(out.size() == 0);
+    }
 
-        // Invalid hex format, valid size
-        {
-            const auto instr = "NOPENOPENOPENOPENOPENOPE"sv;
-            const std::vector<u8> in(instr.cbegin(), instr.cend());
-            std::vector<u8> out;
-            from_hex(in, out);
-            CHECK(out.size() == 0);
-        }
+    SECTION("Invalid hex format, valid size")
+    {
+        const auto instr = "NOPENOPENOPENOPENOPENOPE"sv;
+        const std::vector<u8> in(instr.cbegin(), instr.cend());
+        std::vector<u8> out;
+        from_hex(in, out);
+        CHECK(out.size() == 0);
     }
 }
