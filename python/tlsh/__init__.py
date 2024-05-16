@@ -20,6 +20,7 @@ class Tlsh:
 
     @property
     def valid(self) -> bool:
+        """Determines whether a TLSH implementation is valid, i.e. the hash was finalized"""
         return self._tlsh_obj.isValid()
 
     def update(self, buffer: Union[bytes, bytearray]) -> None:
@@ -28,17 +29,18 @@ class Tlsh:
         _buffer = buffer if isinstance(buffer, bytearray) else bytearray(buffer)
         self._tlsh_obj.update(_buffer)
 
-    def final(self, buffer: Union[bytes, bytearray] = b"") -> None:
+    def final(self, buffer: Union[bytes, bytearray] = b"", option: int = 0) -> None:
         """Finalize the TLSH computation"""
         assert isinstance(buffer, bytes) or isinstance(buffer, bytearray)
         _buffer = buffer if isinstance(buffer, bytearray) else bytearray(buffer)
-        self._tlsh_obj.final(_buffer, 0)
+        self._tlsh_obj.update(_buffer)
+        self._tlsh_obj.final(option)
 
     def hexdigest(self, ver: int = 0) -> str:
         """Once finalized, output the TLSH hash as a hex-string"""
         assert bool(self), "Invalid state"
         assert 0 <= ver < 10, "Invalid version"
-        return str(self._tlsh_obj.getHash(ver))
+        return str(self._tlsh_obj.getHashString(ver))
 
     def digest(self, ver: int = 0) -> bytes:
         """Once finalized, output the TLSH hash as bytes"""

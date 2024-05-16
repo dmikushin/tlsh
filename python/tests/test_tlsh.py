@@ -97,9 +97,8 @@ def test_batch_test_base():
             tlsh_hex == expected_value.upper()
         ), f"Mismatch on {fname}: expected={expected_value.upper()}  got={tlsh_hex}"
 
-        assert (
-            tlsh_raw == bytes.fromhex(expected_value)
-        ), f"Mismatch on {fname}: expected={tlsh_raw}  got={bytes.fromhex(expected_value)}"
+        expected_value_raw = bytes.fromhex(expected_value)
+        assert tlsh_raw == expected_value_raw, f"Mismatch on {fname}: got={tlsh_raw} expected={expected_value_raw}"
 
 
 def test_batch_test_extended_file_level():
