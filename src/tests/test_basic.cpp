@@ -98,9 +98,9 @@ TEST_CASE("Evaluation", "[" NS "]")
             std::vector<u8> inhex;
             from_hex(std::vector<u8>(instr.cbegin(), instr.cend()), inhex);
             t.update(inhex);
-            t.final(std::vector<u8>(), 0);
+            t.final();
             REQUIRE(t.isValid());
-            CHECK(t.getHash() == res);
+            CHECK(t.getHashString() == res);
         }
     }
 }

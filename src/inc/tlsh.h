@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -74,22 +75,24 @@ public:
     update(std::vector<u8> const &data);
 
     ///
-    /// @brief to signal the class there is no more data to be added
+    /// @brief Required step to signal the class there is no more data to be added
     ///
-    /// @param [in] data
-    /// @param [in] tlsh_option
+    /// @param [in] (optional) tlsh_option - default 0
     ///
     void
-    final(std::vector<u8> const &data, u32 tlsh_option);
+    final(u32 tlsh_option = 0);
+
+    const std::vector<u8>
+    getHashBytes(u8 showvers = 0) const;
 
     /* to get the hex-encoded hash code */
     const std::string
-    getHash(u8 showvers = 0) const;
+    getHashString(u8 showvers = 0) const;
 
     /* to get the hex-encoded hash code without allocating buffer in TlshImpl - bufSize should be
      * TLSH_STRING_BUFFER_LEN */
     // const char *
-    // getHash(char *buffer, unsigned int bufSize, int showvers = 0) const;
+    // getHashString(char *buffer, unsigned int bufSize, int showvers = 0) const;
 
     /* to bring to object back to the initial state */
     void
@@ -126,7 +129,7 @@ public:
     fromTlshStr(const std::string &str);
 
     int
-    fromTlshBytes(std::vector<u8> const& bytes);
+    fromTlshBytes(std::vector<u8> const &bytes);
 
     /* check if Tlsh object is valid to operate */
     bool

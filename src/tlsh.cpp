@@ -136,38 +136,24 @@ Tlsh::update(std::vector<u8> const &data)
 }
 
 void
-Tlsh::final(std::vector<u8> const &data, u32 tlsh_option)
+Tlsh::final(u32 tlsh_option)
 {
-    if (data.size() > 0)
-    {
-        m_Implementation->update(data.data(), data.size(), tlsh_option);
-    }
-
     m_Implementation->final(tlsh_option);
 }
 
-const std::string
-Tlsh::getHash(u8 showvers) const
+const std::vector<u8>
+Tlsh::getHashBytes(u8 showvers) const
 {
-    auto const &res = m_Implementation->hash(showvers);
-    if (res.size() == 0)
-    {
-        return "";
-    }
-    return std::string((char *)res.data(), res.size());
+    return m_Implementation->hash(showvers);
 }
 
-// const char *
-// Tlsh::getHash(char *buffer, unsigned int bufSize, int showvers) const
-// {
-//     if (nullptr != impl)
-//         return impl->hash(buffer, bufSize, showvers);
-//     else
-//     {
-//         buffer[0] = '\0';
-//         return buffer;
-//     }
-// }
+const std::string
+Tlsh::getHashString(u8 showvers) const
+{
+    auto const &res = this->getHashBytes(showvers);
+    return (res.size() == 0) ? "" : std::string((char *)res.data(), res.size());
+}
+
 
 void
 Tlsh::reset()
