@@ -11,9 +11,9 @@ on:
 
 jobs:
   libtlsh:
-    name: "${{ matrix.variants.os }}/${{ matrix.variants.arch }}/${{ matrix.variants.config }}/STATIC=${{ matrix.static }}"
+    name: "${{ matrix.variants.os }}/${{ matrix.variants.arch }}/${{ matrix.variants.config }}"
     env:
-      CMAKE_FLAGS: "-D TLSH_BUILD_BINDINGS:BOOL=OFF"
+      CMAKE_FLAGS: "-D TLSH_BUILD_BINDINGS=OFF -DTLSH_BUILD_TESTS=OFF"
       NB_CPU: 1
       VERBOSE: 1
     strategy:
@@ -66,17 +66,17 @@ jobs:
     - name: Initialize cmake (Windows)
       if: matrix.variants.os == 'windows-2022'
       run: |
-        cmake -S . -B ./build -A ${{ matrix.variants.arch }} ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
+        cmake -S . -B ./build -A ${{ matrix.variants.arch }} ${{ env.CMAKE_FLAGS }}
 
     - name: Initialize cmake (Linux)
       if: matrix.variants.os == 'ubuntu-22.04'
       run: |
-        cmake -S . -B ./build ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
+        cmake -S . -B ./build ${{ env.CMAKE_FLAGS }}
 
     - name: Initialize cmake (MacOS)
       if: matrix.variants.os == 'macos-13'
       run: |
-        cmake -S . -B ./build ${{ env.CMAKE_FLAGS }} -DTLSH_BUILD_STATIC:BOOL=${{ matrix.static }}
+        cmake -S . -B ./build ${{ env.CMAKE_FLAGS }}
 
     - name: Build library
       run: |
@@ -94,7 +94,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: libtlsh-${{ matrix.variants.os }}.${{ matrix.variants.config }}-${{ matrix.variants.arch }}-${{ matrix.static }}
+        name: libtlsh-${{ matrix.variants.os }}.${{ matrix.variants.config }}-${{ matrix.variants.arch }}
         path: |
           artifact/
 

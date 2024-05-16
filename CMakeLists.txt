@@ -16,7 +16,6 @@ set(CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-option(TLSH_BUILD_STATIC "Build as static library instead of shared library" ON)
 option(TLSH_BUILD_BINDINGS "Build Python bindings" ON)
 option(TLSH_BUILD_TESTS "Build tests" OFF)
 option(TLSH_BUILD_WITH_ASAN "Build with Address Sanitizer" ON)
@@ -49,10 +48,6 @@ set(TLSH_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 add_subdirectory(src)
 
 if(TLSH_BUILD_BINDINGS)
-  if (NOT TLSH_BUILD_STATIC)
-    message(FATAL_ERROR "Bindings require static build")
-  endif (NOT TLSH_BUILD_STATIC)
-
   add_subdirectory(python)
 endif(TLSH_BUILD_BINDINGS)
 
