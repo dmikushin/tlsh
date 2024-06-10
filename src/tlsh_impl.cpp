@@ -74,8 +74,11 @@
 
 static_assert(CODE_SIZE > 0);
 
+constexpr size_t CacheLineSize = 64;
+
 static void
 find_quartile(unsigned int *q1, unsigned int *q2, unsigned int *q3, const unsigned int *a_bucket);
+
 static unsigned int
 partition(unsigned int *buf, unsigned int left, unsigned int right);
 
@@ -109,7 +112,8 @@ TlshImpl::reset()
 
 // Pearson's sample random table
 // clang-format off
-static std::array<u8, 256> v_table = {1, 87, 49, 12, 176, 178, 102, 166, 121, 193, 6, 84, 249, 230,
+alignas(CacheLineSize)
+const static std::array<u8, 256> v_table = {1, 87, 49, 12, 176, 178, 102, 166, 121, 193, 6, 84, 249, 230,
     44, 163, 14, 197, 213, 181, 161, 85, 218, 80, 64, 239, 24, 226, 236, 142, 38, 200, 110, 177,
     104, 103, 141, 253, 255, 50, 77, 101, 81, 18, 45, 96, 31, 222, 25, 107, 190, 70, 86, 237, 240,
     34, 72, 242, 20, 214, 244, 227, 149, 235, 97, 234, 57, 22, 60, 250, 82, 175, 208, 5, 127, 199,
@@ -123,7 +127,8 @@ static std::array<u8, 256> v_table = {1, 87, 49, 12, 176, 178, 102, 166, 121, 19
     180, 117, 76, 140, 36, 210, 172, 41, 54, 159, 8, 185, 232, 113, 196, 231, 47, 146, 120, 51, 65,
     28, 144, 254, 221, 93, 189, 194, 139, 112, 43, 71, 109, 184, 209};
 
-static std::array<u8, 256> v_table48 = {
+alignas(CacheLineSize)
+const static std::array<u8, 256> v_table48 = {
 	1, 39, 1, 12, 32, 34, 6, 22, 25, 1, 6, 36, 48, 38, 44, 19,
 	14, 5, 21, 37, 17, 37, 26, 32, 16, 47, 24, 34, 44, 46, 38, 8,
 	14, 33, 8, 7, 45, 48, 48, 2, 29, 5, 33, 18, 45, 0, 31, 30,
@@ -144,29 +149,16 @@ static std::array<u8, 256> v_table48 = {
 // clang-format on
 
 // Pearson's algorithm
-unsigned char
-b_mapping(unsigned char salt, unsigned char i, unsigned char j, unsigned char k)
+inline uint8_t
+b_mapping(uint8_t salt, uint8_t i, uint8_t j, uint8_t k)
 {
-    unsigned char h = 0;
-
-    h = v_table[h ^ salt];
-    h = v_table[h ^ i];
-    h = v_table[h ^ j];
-    h = v_table[h ^ k];
+    uint8_t h = 0;
+    h         = v_table[h ^ salt];
+    h         = v_table[h ^ i];
+    h         = v_table[h ^ j];
+    h         = v_table[h ^ k];
     return h;
 }
-
-/*
-NEVER USED - showing a step in the optimization sequence
-unsigned char faster_b_mapping(unsigned char mod_salt, unsigned char i, unsigned char j, unsigned
-char k) { unsigned char h;
-
-    h = v_table[mod_salt ^ i];
-    h = v_table[h ^ j];
-    h = v_table[h ^ k];
-    return h;
-}
-*/
 
 #if NB_TLSH_BUCKETS == 48
 #define fast_b_mapping(ms, i, j, k) (v_table48[v_table[v_table[ms ^ i] ^ j] ^ k])
@@ -1000,69 +992,73 @@ TlshImpl::fromTlshBytes(std::vector<u8> const &buf)
 }
 
 
-std::vector<u8> const &
-TlshImpl::hash(std::vector<u8> &buffer, u8 showvers) const
+bool
+TlshImpl::generate_hash(u8 showvers) const
 {
-    const size_t bufSize = buffer.size();
-
-    // Insufficient buffer
-    if (bufSize != TLSH_STRING_LEN_REQ)
-    {
-        // strncpy(&buffer[0], "", bufSize);
-        buffer.clear();
-        buffer.resize(0);
-        return buffer;
-    }
-
     // Invalid state
     if (this->lsh_code_valid == false)
     {
         // strncpy(&buffer[0], "", bufSize);
-        buffer.clear();
-        buffer.resize(0);
-        return buffer;
+        // buffer.clear();
+        // buffer.resize(0);
+        return false;
     }
 
-    lsh_bin_struct tmp;
+    std::vector<u8> &buffer = this->lsh_code;
+    buffer.clear();
+    buffer.resize(TLSH_STRING_LEN_REQ / 2 - 1);
+
+    const size_t bufSize = buffer.size();
+
+    // Insufficient buffer
+    // if (bufSize != TLSH_STRING_LEN_REQ / 2)
+    // {
+    //     // strncpy(&buffer[0], "", bufSize);
+    //     // buffer.clear();
+    //     buffer.resize(0);
+    //     return buffer;
+    // }
+
+
+    lsh_bin_struct tmp{};
     for (int k = 0; k < TLSH_CHECKSUM_LEN; k++)
     {
         tmp.checksum[k] = swap_byte(this->lsh_bin.checksum[k]);
     }
     tmp.Lvalue = swap_byte(this->lsh_bin.Lvalue);
     tmp.Q.QB   = swap_byte(this->lsh_bin.Q.QB);
-    for (int i = 0; i < CODE_SIZE; i++)
+    for (size_t i = 0; i < CODE_SIZE; i++)
     {
         tmp.tmp_code[i] = (this->lsh_bin.tmp_code[CODE_SIZE - 1 - i]);
     }
 
-    if (0 < showvers && showvers < 10)
-    {
-        buffer[0] = 'T';
-        buffer[1] = '0' + showvers;
-        to_hex((unsigned char *)&tmp, sizeof(tmp), &buffer[2]);
-    }
-    else
-    {
-        buffer.resize(bufSize - 2);
-        to_hex((unsigned char *)&tmp, sizeof(tmp), &buffer[0]);
-    }
-    return buffer;
+    // if (0 < showvers && showvers < 10)
+    // {
+    //     buffer[0] = 'T';
+    //     buffer[1] = '0' + showvers;
+    //     ::memcpy(&buffer[2], &tmp, sizeof(tmp));
+    //     // to_hex((unsigned char *)&tmp, sizeof(tmp), &buffer[2]);
+    // }
+    // else
+    // {
+    // buffer.resize(bufSize - 2);
+    ::memcpy(&buffer[0], &tmp, sizeof(tmp));
+    // to_hex((unsigned char *)&tmp, sizeof(tmp), &buffer[0]);
+    // }
+
+    return true;
 }
 
 /* to get the hex-encoded hash code */
 std::vector<u8> const &
 TlshImpl::hash(u8 showvers) const
 {
-    if (!this->lsh_code.empty())
+    if (this->lsh_code.empty()) [[unlikely]]
     {
-        // lsh_code has been previously calculated, so just return it
-        return this->lsh_code;
+        this->generate_hash(showvers);
     }
 
-    this->lsh_code.resize(TLSH_STRING_LEN_REQ);
-    ::memset(this->lsh_code.data(), 0, TLSH_STRING_LEN_REQ);
-
-    return hash(this->lsh_code, showvers);
+    return this->lsh_code;
 }
 
 
@@ -1070,7 +1066,7 @@ TlshImpl::hash(u8 showvers) const
 int
 TlshImpl::compare(const TlshImpl &other) const
 {
-    return (memcmp(&(this->lsh_bin), &(other.lsh_bin), sizeof(this->lsh_bin)));
+    return memcmp(&(this->lsh_bin), &(other.lsh_bin), sizeof(this->lsh_bin));
 }
 
 ////////////////////////////////////////////
@@ -1119,26 +1115,26 @@ set_tlsh_distance_parameters(int length_mult_value,
 int
 TlshImpl::Lvalue()
 {
-    return (this->lsh_bin.Lvalue);
+    return this->lsh_bin.Lvalue;
 }
 int
 TlshImpl::Q1ratio()
 {
-    return (this->lsh_bin.Q.QR.Q1ratio);
+    return this->lsh_bin.Q.QR.Q1ratio;
 }
 int
 TlshImpl::Q2ratio()
 {
-    return (this->lsh_bin.Q.QR.Q2ratio);
+    return this->lsh_bin.Q.QR.Q2ratio;
 }
 int
 TlshImpl::Checksum(int k)
 {
     if ((k >= TLSH_CHECKSUM_LEN) || (k < 0))
     {
-        return (0);
+        return 0;
     }
-    return (this->lsh_bin.checksum[k]);
+    return this->lsh_bin.checksum[k];
 }
 int
 TlshImpl::BucketValue(int bucket)
@@ -1163,26 +1159,40 @@ TlshImpl::BucketValue(int bucket)
     int p2 = h1 % 4;
     int p3 = h2 / 4;
     int p4 = h2 % 4;
-    if (elem == 0)
+    // if (elem == 0)
+    // {
+    //     return (p1);
+    // }
+    // if (elem == 1)
+    // {
+    //     return (p2);
+    // }
+    // if (elem == 2)
+    // {
+    //     return (p3);
+    // }
+    // return (p4);
+
+    switch (elem)
     {
-        return (p1);
+    case 0:
+        return p1;
+    case 1:
+        return p2;
+    case 2:
+        return p3;
+    default:
+        return p4;
     }
-    if (elem == 1)
-    {
-        return (p2);
-    }
-    if (elem == 2)
-    {
-        return (p3);
-    }
-    return (p4);
 }
+
 int
 TlshImpl::HistogramCount(int bucket)
 {
     if (this->a_bucket == nullptr)
-        return (-1);
-    return (this->a_bucket[EFF_BUCKETS - 1 - bucket]);
+        return -1;
+
+    return this->a_bucket[EFF_BUCKETS - 1 - bucket];
 }
 
 int
@@ -1224,7 +1234,7 @@ TlshImpl::totalDiff(std::unique_ptr<TlshImpl> const &other, bool len_diff) const
 
     diff += h_distance(CODE_SIZE, this->lsh_bin.tmp_code, other->lsh_bin.tmp_code);
 
-    return (diff);
+    return diff;
 }
 
 #ifdef __cplusplus

@@ -64,6 +64,7 @@
 
 #include "stdio.h"
 #include "tlsh_impl.h"
+#include "tlsh_util.h"
 
 /////////////////////////////////////////////////////
 // C++ Implementation
@@ -77,49 +78,48 @@ Tlsh::Tlsh() : m_Implementation{std::make_unique<TlshImpl>()}
 void
 Tlsh::display_notice()
 {
-    printf("   =========================================================================\n");
-    printf("   ==  NOTICE file for use with the Apache License, Version 2.0,          ==\n");
-    printf("   ==  in this case for the Trend Locality Sensitive Hash distribution.   ==\n");
-    printf("   =========================================================================\n");
-    printf("\n");
-    printf("   Trend Locality Sensitive Hash (TLSH)\n");
-    printf("   Copyright 2010-2014 Trend Micro\n");
-    printf("\n");
-    printf("   This product includes software developed at\n");
-    printf("   Trend Micro (http://www.trendmicro.com/)\n");
-    printf("\n");
-    printf("   Refer to the following publications for more information:\n");
-    printf("   \n");
-    printf("     Jonathan Oliver, Chun Cheng and Yanggui Chen,\n");
-    printf("     \"TLSH - A Locality Sensitive Hash\"\n");
-    printf("     4th Cybercrime and Trustworthy Computing Workshop, Sydney, November 2013\n");
-    printf("     https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf\n");
-    printf("    \n");
-    printf("     Jonathan Oliver, Scott Forman and Chun Cheng,\n");
-    printf("     \"Using Randomization to Attack Similarity Digests\"\n");
     printf(
+        "   =========================================================================\n"
+        "   ==  NOTICE file for use with the Apache License, Version 2.0,          ==\n"
+        "   ==  in this case for the Trend Locality Sensitive Hash distribution.   ==\n"
+        "   =========================================================================\n"
+        "\n"
+        "   Trend Locality Sensitive Hash (TLSH)\n"
+        "   Copyright 2010-2014 Trend Micro\n"
+        "\n"
+        "   This product includes software developed at\n"
+        "   Trend Micro (http://www.trendmicro.com/)\n"
+        "\n"
+        "   Refer to the following publications for more information:\n"
+        "   \n"
+        "     Jonathan Oliver, Chun Cheng and Yanggui Chen,\n"
+        "     \"TLSH - A Locality Sensitive Hash\"\n"
+        "     4th Cybercrime and Trustworthy Computing Workshop, Sydney, November 2013\n"
+        "     https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf\n"
+        "    \n"
+        "     Jonathan Oliver, Scott Forman and Chun Cheng,\n"
+        "     \"Using Randomization to Attack Similarity Digests\"\n"
         "     Applications and Techniques in Information Security. Springer Berlin Heidelberg, "
-        "2014. 199-210.\n");
-    printf("     https://github.com/trendmicro/tlsh/blob/master/Attacking_LSH_and_Sim_Dig.pdf\n");
-    printf("\n");
-    printf("     Jonathan Oliver and Jayson Pryde\n");
-    printf(
+        "2014. 199-210.\n"
+        "     https://github.com/trendmicro/tlsh/blob/master/Attacking_LSH_and_Sim_Dig.pdf\n"
+        "\n"
+        "     Jonathan Oliver and Jayson Pryde\n"
         "     "
         "http://blog.trendmicro.com/trendlabs-security-intelligence/"
-        "smart-whitelisting-using-locality-sensitive-hashing/\n");
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("\n");
-    printf("    \n");
-    printf("   SHA1 of first 242 lines of LICENSE - so that we can append NOTICE.txt to LICENSE\n");
-    printf("   $ head -n 242 LICENSE | openssl dgst -sha1\n");
-    printf("   (stdin)= 11e8757af16132dd60979eacd73a525a40ff31f0\n");
-    printf("\n");
+        "smart-whitelisting-using-locality-sensitive-hashing/\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "\n"
+        "    \n"
+        "   SHA1 of first 242 lines of LICENSE - so that we can append NOTICE.txt to LICENSE\n"
+        "   $ head -n 242 LICENSE | openssl dgst -sha1\n"
+        "   (stdin)= 11e8757af16132dd60979eacd73a525a40ff31f0\n"
+        "\n");
 }
 
 
@@ -141,36 +141,64 @@ Tlsh::final(u32 tlsh_option)
     m_Implementation->final(tlsh_option);
 }
 
-const std::vector<u8>
+std::vector<u8> const &
 Tlsh::getHashBytes(u8 showvers) const
 {
     return m_Implementation->hash(showvers);
 }
 
-const std::string
-Tlsh::getHashString(u8 showvers) const
+std::string const &
+Tlsh::getHashString(u8 showvers)
 {
-    auto const &res = this->getHashBytes(showvers);
-    return (res.size() == 0) ? "" : std::string((char *)res.data(), res.size());
-}
+    // if the version number is illegal, just ignore
+    if (showvers >= 10)
+    {
+        throw std::runtime_error("invalid version");
+    }
 
+    if (this->m_stringHashes[showvers].empty())
+    {
+        this->m_stringHashes[showvers] = [this, showvers]()
+        {
+            auto const &res = this->getHashBytes(showvers);
+            auto hex        = std::vector<u8>(TLSH_STRING_LEN_REQ);
+
+            if (0 < showvers && showvers < 10)
+            {
+                hex[0] = 'T';
+                hex[1] = '0' + showvers;
+                to_hex(res.data(), res.size(), &hex[2]);
+            }
+            else
+            {
+                hex.resize(TLSH_STRING_LEN_REQ - 2);
+                to_hex(res.data(), res.size(), &hex[0]);
+            }
+
+            return res.size() == 0 ? "" : std::string((char *)hex.data(), hex.size());
+        }();
+    }
+
+    return this->m_stringHashes[showvers];
+}
 
 void
 Tlsh::reset()
 {
     m_Implementation->reset();
+    m_stringHashes.fill("");
 }
 
 
 bool
 Tlsh::operator==(const Tlsh &other) const
 {
-    if (this == &other)
+    if (this == &other) [[unlikely]]
     {
         return true;
     }
 
-    return (0 == m_Implementation->compare(*other.m_Implementation));
+    return 0 == m_Implementation->compare(*other.m_Implementation);
 }
 
 bool
@@ -182,33 +210,39 @@ Tlsh::operator!=(const Tlsh &other) const
 int
 Tlsh::Lvalue()
 {
-    return (m_Implementation->Lvalue());
+    return m_Implementation->Lvalue();
 }
 int
 Tlsh::Q1ratio()
 {
-    return (m_Implementation->Q1ratio());
+    return m_Implementation->Q1ratio();
 }
 int
 Tlsh::Q2ratio()
 {
-    return (m_Implementation->Q2ratio());
+    return m_Implementation->Q2ratio();
 }
 int
 Tlsh::Checksum(int k)
 {
-    return (m_Implementation->Checksum(k));
+    return m_Implementation->Checksum(k);
 }
 int
 Tlsh::BucketValue(int bucket)
 {
-    return (m_Implementation->BucketValue(bucket));
+    if (bucket >= (EFF_BUCKETS - 1))
+        return -1;
+
+    return m_Implementation->BucketValue(bucket);
 }
 
 int
 Tlsh::HistogramCount(int bucket)
 {
-    return (m_Implementation->HistogramCount(bucket));
+    if (bucket >= (EFF_BUCKETS - 1))
+        return -1;
+
+    return m_Implementation->HistogramCount(bucket);
 }
 
 int
