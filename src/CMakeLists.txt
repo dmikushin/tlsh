@@ -1,7 +1,7 @@
 set(TLSH_SRC_DIR ${TLSH_ROOT_DIR}/src)
-set(TLSH_INC_DIR ${TLSH_SRC_DIR}/inc)
+set(TLSH_INC_DIR ${TLSH_ROOT_DIR}/include)
 
-configure_file(${TLSH_INC_DIR}/tlsh_version.h.in ${TLSH_INC_DIR}/tlsh_version.h)
+configure_file(${TLSH_INC_DIR}/tlsh/tlsh_version.h.in ${TLSH_INC_DIR}/tlsh/tlsh_version.h)
 
 set(SOURCE_FILES
     ${TLSH_SRC_DIR}/tlsh_impl.cpp
@@ -10,7 +10,9 @@ set(SOURCE_FILES
 )
 
 add_library(tlsh STATIC)
+add_library(tlsh::tlsh ALIAS tlsh)
 target_sources(tlsh PRIVATE ${SOURCE_FILES})
+target_include_directories(tlsh PRIVATE ${TLSH_INC_DIR}/tlsh)
 target_include_directories(tlsh PUBLIC ${TLSH_INC_DIR})
 target_compile_definitions(tlsh
     PUBLIC
