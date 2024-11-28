@@ -74,6 +74,20 @@ Tlsh::Tlsh() : m_Implementation{std::make_unique<TlshImpl>()}
 {
 }
 
+Tlsh::Tlsh(const Tlsh& other) : m_Implementation{std::make_unique<TlshImpl>()}
+{
+    *m_Implementation = *other.m_Implementation;
+}
+
+Tlsh &
+Tlsh::operator=(const Tlsh& other)
+{
+    if (this == &other)
+        return *this;
+ 
+    *m_Implementation = *other.m_Implementation;
+    return *this;
+}
 
 void
 Tlsh::display_notice()
@@ -126,13 +140,19 @@ Tlsh::display_notice()
 void
 Tlsh::update(std::vector<u8> const &data)
 {
+    Tlsh::update(data.data(), data.size());
+}
+
+void
+Tlsh::update(const u8* data, size_t length)
+{
     //
     // threaded and private options only available to
     //	windowsize == 5
     //	calling final - without calling update first
     //
     const u32 tlsh_option = 0;
-    m_Implementation->update(data.data(), data.size(), tlsh_option);
+    m_Implementation->update(data, length, tlsh_option);
 }
 
 void

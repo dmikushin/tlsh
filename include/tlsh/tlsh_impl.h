@@ -86,7 +86,7 @@ private:
     generate_hash(u8 showvers) const; // saves allocating hash string in TLSH instance - bufSize
                                       // should be TLSH_STRING_LEN + 1
 
-    std::unique_ptr<u32[]> a_bucket;
+    std::vector<u32> a_bucket;
     std::array<u8, SLIDING_WND_SIZE> slide_window;
     unsigned int data_len;
 

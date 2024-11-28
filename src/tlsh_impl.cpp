@@ -84,7 +84,7 @@ partition(unsigned int *buf, unsigned int left, unsigned int right);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-TlshImpl::TlshImpl() : a_bucket{nullptr}, data_len{0}, lsh_code{}, lsh_code_valid{false}
+TlshImpl::TlshImpl() : data_len{0}, lsh_code{}, lsh_code_valid{false}
 {
     memset(this->slide_window.data(), 0, this->slide_window.size());
     memset(&this->lsh_bin, 0, sizeof(this->lsh_bin));
@@ -97,7 +97,7 @@ TlshImpl::~TlshImpl() = default;
 void
 TlshImpl::reset()
 {
-    this->a_bucket.reset();
+    this->a_bucket.resize(0);
     memset(this->slide_window.data(), 0, this->slide_window.size());
 
     this->lsh_code.clear();
@@ -194,10 +194,10 @@ TlshImpl::update(const u8 *data, unsigned int len, int tlsh_option)
 
     unsigned int fed_len = this->data_len;
 
-    if (!this->a_bucket)
+    if (this->a_bucket.size() == 0)
     {
-        this->a_bucket = std::make_unique<u32[]>(BUCKETS);
-        memset(this->a_bucket.get(), 0, sizeof(u32) * BUCKETS);
+        this->a_bucket.resize(BUCKETS);
+        memset(&this->a_bucket[0], 0, sizeof(u32) * BUCKETS);
     }
 
 #if SLIDING_WND_SIZE == 5
@@ -470,13 +470,13 @@ TlshImpl::fast_update5(const u8 *data, unsigned int len, int tlsh_option)
     if (tlsh_option & TLSH_OPTION_PRIVATE)
     {
         raw_fast_update5_private(
-            data, len, this->data_len, this->a_bucket.get(), this->slide_window.data());
+            data, len, this->data_len, &this->a_bucket[0], this->slide_window.data());
         this->data_len += len;
         this->lsh_bin.checksum[0] = 0;
     }
     else
     {
-        raw_fast_update5(data, len, this->data_len, this->a_bucket.get(),
+        raw_fast_update5(data, len, this->data_len, &this->a_bucket[0],
             &(this->lsh_bin.checksum[0]), this->slide_window.data());
         this->data_len += len;
     }
@@ -835,24 +835,24 @@ TlshImpl::final(int fc_cons_option)
     if (((fc_cons_option & TLSH_OPTION_CONSERVATIVE) == 0) && (this->data_len < MIN_DATA_LENGTH))
     {
         // this->lsh_code be empty
-        this->a_bucket.release();
+        this->a_bucket.resize(0);
         return;
     }
     if ((fc_cons_option & TLSH_OPTION_CONSERVATIVE) &&
         (this->data_len < MIN_CONSERVATIVE_DATA_LENGTH))
     {
         // this->lsh_code be empty
-        this->a_bucket.release();
+        this->a_bucket.resize(0);
         return;
     }
 
     unsigned int q1, q2, q3;
-    find_quartile(&q1, &q2, &q3, this->a_bucket.get());
+    find_quartile(&q1, &q2, &q3, &this->a_bucket[0]);
 
     // issue #79 - divide by 0 if q3 == 0
     if (q3 == 0)
     {
-        this->a_bucket = nullptr;
+        this->a_bucket.resize(0);
         return;
     }
 
@@ -872,13 +872,13 @@ TlshImpl::final(int fc_cons_option)
     if (nonzero < 18)
     {
         // printf("nonzero=%d\n", nonzero);
-        this->a_bucket.release();
+        this->a_bucket.resize(0);
         return;
     }
 #else
     if (nonzero <= 4 * CODE_SIZE / 2)
     {
-        this->a_bucket.release();
+        this->a_bucket.resize(0);
         return;
     }
 #endif
@@ -908,7 +908,7 @@ TlshImpl::final(int fc_cons_option)
     if ((fc_cons_option & TLSH_OPTION_KEEP_BUCKET) == 0)
     {
         // Done with a_bucket so deallocate
-        this->a_bucket = nullptr;
+        this->a_bucket.resize(0);
     }
 
     this->lsh_bin.Lvalue       = l_capturing(this->data_len);
@@ -1189,7 +1189,7 @@ TlshImpl::BucketValue(int bucket)
 int
 TlshImpl::HistogramCount(int bucket)
 {
-    if (this->a_bucket == nullptr)
+    if (this->a_bucket.size() == 0)
         return -1;
 
     return this->a_bucket[EFF_BUCKETS - 1 - bucket];

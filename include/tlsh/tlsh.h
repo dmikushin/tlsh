@@ -51,13 +51,13 @@ class TLSH_API Tlsh
 {
 public:
     Tlsh();
-    Tlsh(const Tlsh &other) = delete;
+    Tlsh(const Tlsh &other);
     Tlsh(Tlsh &&other)      = default;
 
 
     // operators
     Tlsh &
-    operator=(const Tlsh &other) = delete;
+    operator=(const Tlsh &other);
     Tlsh &
     operator=(Tlsh &&other) = default;
     bool
@@ -73,6 +73,9 @@ public:
     ///
     void
     update(std::vector<u8> const &data);
+
+    void
+    update(const u8* data, size_t length);
 
     ///
     /// @brief Required step to signal the class there is no more data to be added
