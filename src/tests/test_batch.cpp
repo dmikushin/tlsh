@@ -357,7 +357,7 @@ TEST_CASE("Batch", "[" NS "]")
             auto const fpath = BASE_DATASET_ROOT / fname;
             REQUIRE(std::filesystem::exists(fpath));
 
-            const auto fd = UniqueHandle{::fopen(fpath.c_str(), "rb")};
+            const auto fd = UniqueHandle{::fopen((char *)fpath.c_str(), "rb")};
             REQUIRE(fd != nullptr);
 
             std::vector<u8> expected_hash(TLSH_STRING_LEN / 2);
