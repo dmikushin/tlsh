@@ -1,0 +1,4 @@
+[submodule "ThirdParty/nanobind"]
+	path = ThirdParty/nanobind
+	url = https://github.com/wjakob/nanobind.git
+	branch = v2.4.0

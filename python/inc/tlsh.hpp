@@ -1,3 +1,3 @@
 #pragma once
 
-#include "tlsh.h"
+#include "tlsh/tlsh.h"

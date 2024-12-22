@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 
 #include <stdio.h>
-#include <tlsh.h>
-#include <tlsh_util.h>
+#include <tlsh/tlsh.h>
+#include <tlsh/tlsh_util.h>
 
 #include <array>
 #include <catch2/catch_test_macros.hpp>

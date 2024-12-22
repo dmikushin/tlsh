@@ -48,6 +48,7 @@ set(TLSH_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 add_subdirectory(src)
 
 if(TLSH_BUILD_BINDINGS)
+  add_subdirectory(ThirdParty/nanobind)
   add_subdirectory(python)
 endif(TLSH_BUILD_BINDINGS)
 
