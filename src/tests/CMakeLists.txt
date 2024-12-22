@@ -16,6 +16,7 @@ foreach(SOURCE_FILE ${TEST_SOURCE_FILES})
     cmake_path(GET SOURCE_FILE STEM TEST_EXECUTABLE_NAME)
     add_executable(${TEST_EXECUTABLE_NAME} ${SOURCE_FILE})
     add_dependencies(${TEST_EXECUTABLE_NAME} Deps::Catch2)
+    target_compile_definitions(${TEST_EXECUTABLE_NAME} PUBLIC THIS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../..")
     target_link_libraries(${TEST_EXECUTABLE_NAME} PUBLIC Catch2::Catch2WithMain tlsh)
 
     if(WIN32)

@@ -26,6 +26,14 @@ python -m pip install -r python/requirements.txt --user --upgrade
 python -m pip install . --user --upgrade
 ```
 
+## Test
+
+Run `ctest` in the CMake build folder:
+
+```
+ctest --test-dir src/tests
+```
+
 ## Usage
 
 ### Python

@@ -29,8 +29,7 @@ using GenericHandle = std::unique_ptr<
 using UniqueHandle = GenericHandle<FILE, ::fclose>;
 using namespace std::literals::string_view_literals;
 
-const std::filesystem::path THIS_DIR{"../../../.."};
-const std::filesystem::path BASE_DATASET_ROOT = THIS_DIR / "tests/datasets/base";
+const std::filesystem::path BASE_DATASET_ROOT = std::filesystem::path(THIS_DIR) / "tests/datasets/base";
 
 
 TEST_CASE("Batch", "[" NS "]")

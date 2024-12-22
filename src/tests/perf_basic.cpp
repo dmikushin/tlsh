@@ -35,9 +35,7 @@ using UniqueHandle = GenericHandle<FILE, ::fclose>;
 
 using namespace std::literals::string_view_literals;
 
-// const std::filesystem::path THIS_DIR{"."};
-const std::filesystem::path THIS_DIR{"../../../.."};
-const std::filesystem::path DATASET_ROOT       = THIS_DIR / "tests/datasets";
+const std::filesystem::path DATASET_ROOT       = std::filesystem::path(THIS_DIR) / "tests/datasets";
 const std::filesystem::path LARGE_DATASET_ROOT = DATASET_ROOT / "large";
 const std::filesystem::path SAMPLE_SMALL       = LARGE_DATASET_ROOT / "d3d12.dll";
 const std::filesystem::path SAMPLE_MEDIUM      = LARGE_DATASET_ROOT / "ntoskrnl.exe";
