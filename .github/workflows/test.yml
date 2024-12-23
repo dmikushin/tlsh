@@ -22,7 +22,7 @@ jobs:
     - run: cmake --build ./build --config Release
     - name: Run Tests
       working-directory: ./build
-      run: ctest --progress --build-config Release --test-dir ./src/tests
+      run: ctest --progress --build-config Release --test-dir ./src/tests --rerun-failed --output-on-failure
 
   binding_tests:
     name: ${{ matrix.os }}/${{ matrix.py }}/Python
