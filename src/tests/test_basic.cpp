@@ -11,8 +11,9 @@
 
 #define NS "TLSH"
 
-using namespace std::literals::string_view_literals;
+static_assert(TLSH_CHECKSUM == 1, "Tests are provided for TLSH_CHECKSUM = 1 mode only");
 
+using namespace std::literals::string_view_literals;
 
 TEST_CASE("Static tests", "[" NS "]")
 {

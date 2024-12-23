@@ -13,6 +13,8 @@
 
 #define NS "TLSH"
 
+static_assert(TLSH_CHECKSUM == 1, "Tests are provided for TLSH_CHECKSUM = 1 mode only");
+
 template<typename T, auto Deleter>
 using GenericHandle = std::unique_ptr<
     T,
