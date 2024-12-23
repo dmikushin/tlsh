@@ -17,8 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: cmake -S. -B build -DTLSH_BUILD_WITH_ASAN=ON -DTLSH_BUILD_TESTS=ON -DTLSH_BUILD_BINDINGS=OFF
-    - run: cmake --build ./build --config Debug
-    - run: ctest --progress --build-config Debug --test-action test --test-dir ./build
+    - run: cmake --build ./build --config Release
+    - run: ctest --progress --build-config Release --test-action test --test-dir ./build/src/tests
 
   binding_tests:
     name: ${{ matrix.os }}/${{ matrix.py }}/Python
