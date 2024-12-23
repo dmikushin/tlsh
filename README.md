@@ -1,7 +1,7 @@
 # TLSH
 
-[![Build](https://github.com/calladoum-elastic/tlsh/actions/workflows/build.yml/badge.svg)](https://github.com/calladoum-elastic/tlsh/actions/workflows/build.yml)
-[![Test](https://github.com/calladoum-elastic/tlsh/actions/workflows/test.yml/badge.svg)](https://github.com/calladoum-elastic/tlsh/actions/workflows/test.yml)
+[![Build](https://github.com/dmikushin/tlsh/actions/workflows/build.yml/badge.svg)](https://github.com/dmikushin/tlsh/actions/workflows/build.yml)
+[![Test](https://github.com/dmikushin/tlsh/actions/workflows/test.yml/badge.svg)](https://github.com/dmikushin/tlsh/actions/workflows/test.yml)
 
 ## Build
 
