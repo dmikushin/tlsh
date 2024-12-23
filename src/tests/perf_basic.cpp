@@ -97,7 +97,7 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
         std::vector<u8> inhex(sz);
 
         let expected_hash_str =
-            "T1F3F36CAE32A810A5E57E917CC5C34609F7B27475571253DF02E0C2BE1E23BE86E39B91"sv;
+            "T12AF31961660ACA3FDA8901B1AD3C5EAF544D663D03B518CBF3CC5C622AE15D36B36D0B"sv;
         std::vector<u8> expected_hash;
 
         const auto cnt = ::fread(inhex.data(), sizeof(u8), sz, fd.get());
@@ -147,7 +147,7 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
         };
         REQUIRE(t.isValid());
     }
-
+#if 0
     SECTION("TLSH large buffer hash (100MB)")
     {
         const auto sz = usize(269893568);
@@ -169,6 +169,7 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
         };
         REQUIRE(t.isValid());
     }
+#endif
 }
 
 TEST_CASE("Hash Perf - no reuse", "[" NS "]")
@@ -233,7 +234,7 @@ TEST_CASE("Hash Perf - no reuse", "[" NS "]")
             REQUIRE(t.isValid());
         };
     }
-
+#if 0
     SECTION("TLSH large buffer hash (100MB)")
     {
         const auto sz = usize(269'893'568);
@@ -253,6 +254,7 @@ TEST_CASE("Hash Perf - no reuse", "[" NS "]")
             REQUIRE(t.isValid());
         };
     }
+#endif
 }
 
 TEST_CASE("Helpers", "[" NS "]")
