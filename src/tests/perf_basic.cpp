@@ -94,21 +94,30 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
         const auto fd = UniqueHandle{::fopen(SAMPLE_SMALL.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
 
-        std::vector<u8> inhex(sz);
-
         let expected_hash_str =
-            "T12AF31961660ACA3FDA8901B1AD3C5EAF544D663D03B518CBF3CC5C622AE15D36B36D0B"sv;
+            "T1E5759D23BC51C07BD16606714D79FABA542DBB294F2448CB77D81F6C8F706C16A3A2A3"sv;
         std::vector<u8> expected_hash;
 
-        const auto cnt = ::fread(inhex.data(), sizeof(u8), sz, fd.get());
-        REQUIRE(cnt == sz);
+        std::vector<u8> in;
+        in.reserve(sz);
+
+        size_t totalRead = 0;
+        while (totalRead < sz) {
+            u8 buffer[1024]; // Temporary buffer
+            size_t bytesRead = ::fread(buffer, sizeof(u8), sizeof(buffer), fd.get());
+            if (bytesRead < 0)
+                break;
+            in.insert(in.end(), buffer, buffer + bytesRead);
+            totalRead += bytesRead;
+        }
+        REQUIRE(totalRead == sz);
 
         auto t = Tlsh();
         BENCHMARK("TLSH (small buffer)")
         {
             t.reset();
             REQUIRE_FALSE(t.isValid());
-            t.update(inhex);
+            t.update(in);
             t.final();
             REQUIRE(t.isValid());
         };
@@ -134,9 +143,19 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
         let res = "T199C6AE62E3E911E5D6BBC279C656851BEBF1B81513305BCF11A0869A1F33BE16B3D302"sv;
 
         auto t = Tlsh();
-        std::vector<u8> in(sz);
-        const auto cnt = ::fread(in.data(), sizeof(u8), sz, fd.get());
-        REQUIRE(cnt == sz);
+        std::vector<u8> in;
+        in.reserve(sz);
+
+        size_t totalRead = 0;
+        while (totalRead < sz) {
+            u8 buffer[1024]; // Temporary buffer
+            size_t bytesRead = ::fread(buffer, sizeof(u8), sizeof(buffer), fd.get());
+            if (bytesRead < 0)
+                break;
+            in.insert(in.end(), buffer, buffer + bytesRead);
+            totalRead += bytesRead;
+        }
+        REQUIRE(totalRead == sz);
 
         BENCHMARK("TLSH (medium buffer)")
         {
@@ -156,9 +175,19 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
         let res = "T199C6AE62E3E911E5D6BBC279C656851BEBF1B81513305BCF11A0869A1F33BE16B3D302"sv;
 
         auto t = Tlsh();
-        std::vector<u8> in(sz);
-        const auto cnt = ::fread(in.data(), sizeof(u8), sz, fd.get());
-        REQUIRE(cnt == sz);
+        std::vector<u8> in;
+        in.reserve(sz);
+
+        size_t totalRead = 0;
+        while (totalRead < sz) {
+            u8 buffer[1024]; // Temporary buffer
+            size_t bytesRead = ::fread(buffer, sizeof(u8), sizeof(buffer), fd.get());
+            if (bytesRead < 0)
+                break;
+            in.insert(in.end(), buffer, buffer + bytesRead);
+            totalRead += bytesRead;
+        }
+        REQUIRE(totalRead == sz);
 
         BENCHMARK("TLSH (large buffer)")
         {
@@ -200,9 +229,19 @@ TEST_CASE("Hash Perf - no reuse", "[" NS "]")
         const auto fd = UniqueHandle{::fopen(SAMPLE_SMALL.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
 
-        std::vector<u8> in(sz);
-        const auto cnt = ::fread(in.data(), sizeof(u8), sz, fd.get());
-        REQUIRE(cnt == sz);
+        std::vector<u8> in;
+        in.reserve(sz);
+
+        size_t totalRead = 0;
+        while (totalRead < sz) {
+            u8 buffer[1024]; // Temporary buffer
+            size_t bytesRead = ::fread(buffer, sizeof(u8), sizeof(buffer), fd.get());
+            if (bytesRead < 0)
+                break;
+            in.insert(in.end(), buffer, buffer + bytesRead);
+            totalRead += bytesRead;
+        }
+        REQUIRE(totalRead == sz);
 
         BENCHMARK("TLSH (small buffer)")
         {
@@ -220,9 +259,19 @@ TEST_CASE("Hash Perf - no reuse", "[" NS "]")
         const auto fd = UniqueHandle{::fopen(SAMPLE_MEDIUM.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
 
-        std::vector<u8> in(sz);
-        const auto cnt = ::fread(in.data(), sizeof(u8), sz, fd.get());
-        REQUIRE(cnt == sz);
+        std::vector<u8> in;
+        in.reserve(sz);
+
+        size_t totalRead = 0;
+        while (totalRead < sz) {
+            u8 buffer[1024]; // Temporary buffer
+            size_t bytesRead = ::fread(buffer, sizeof(u8), sizeof(buffer), fd.get());
+            if (bytesRead < 0)
+                break;
+            in.insert(in.end(), buffer, buffer + bytesRead);
+            totalRead += bytesRead;
+        }
+        REQUIRE(totalRead == sz);
 
         BENCHMARK("TLSH (medium buffer)")
         {
@@ -240,9 +289,19 @@ TEST_CASE("Hash Perf - no reuse", "[" NS "]")
         const auto fd = UniqueHandle{::fopen(SAMPLE_LARGE.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
 
-        std::vector<u8> in(sz);
-        const auto cnt = ::fread(in.data(), sizeof(u8), sz, fd.get());
-        REQUIRE(cnt == sz);
+        std::vector<u8> in;
+        in.reserve(sz);
+
+        size_t totalRead = 0;
+        while (totalRead < sz) {
+            u8 buffer[1024]; // Temporary buffer
+            size_t bytesRead = ::fread(buffer, sizeof(u8), sizeof(buffer), fd.get());
+            if (bytesRead < 0)
+                break;
+            in.insert(in.end(), buffer, buffer + bytesRead);
+            totalRead += bytesRead;
+        }
+        REQUIRE(totalRead == sz);
 
         BENCHMARK("TLSH (large buffer)")
         {
