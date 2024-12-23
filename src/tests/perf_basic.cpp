@@ -88,9 +88,9 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
         CHECK(res_str == expected_hash_str);
     }
 
-    SECTION("TLSH small buffer hash (100KB)")
+    SECTION("TLSH small buffer hash (1MB)")
     {
-        const auto sz = usize(158440);
+        const auto sz = usize(1'699'840);
         const auto fd = UniqueHandle{::fopen(SAMPLE_SMALL.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
 
@@ -128,7 +128,7 @@ TEST_CASE("Hash Perf - reuse", "[" NS "]")
 
     SECTION("TLSH medium buffer hash (10MB)")
     {
-        const auto sz = usize(12068320);
+        const auto sz = usize(12'105'200);
         const auto fd = UniqueHandle{::fopen(SAMPLE_MEDIUM.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
         let res = "T199C6AE62E3E911E5D6BBC279C656851BEBF1B81513305BCF11A0869A1F33BE16B3D302"sv;
@@ -194,9 +194,9 @@ TEST_CASE("Hash Perf - no reuse", "[" NS "]")
         };
     }
 
-    SECTION("TLSH small buffer hash (100KB)")
+    SECTION("TLSH small buffer hash (1MB)")
     {
-        const auto sz = usize(158'440);
+        const auto sz = usize(1'699'840);
         const auto fd = UniqueHandle{::fopen(SAMPLE_SMALL.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
 
@@ -216,10 +216,9 @@ TEST_CASE("Hash Perf - no reuse", "[" NS "]")
 
     SECTION("TLSH medium buffer hash (10MB)")
     {
-        const auto sz = usize(12'068'320);
+        const auto sz = usize(12'105'200);
         const auto fd = UniqueHandle{::fopen(SAMPLE_MEDIUM.string().c_str(), "r")};
         REQUIRE(fd != nullptr);
-
 
         std::vector<u8> in(sz);
         const auto cnt = ::fread(in.data(), sizeof(u8), sz, fd.get());
