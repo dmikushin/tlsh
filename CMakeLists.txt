@@ -36,7 +36,11 @@ endif()
 
 # TLSH uses 1 byte checksum. The collision rate is 1 in 24.
 # It can use 3 bytes checksum now. That collision rate in 1 in 5800.
-set(TLSH_CHECKSUM 3)
+set(TLSH_CHECKSUM 1 CACHE STRING "TLSH checksum width: 1 byte or 3 bytes")
+
+if(NOT TLSH_CHECKSUM MATCHES "^[13]$")
+    message(FATAL_ERROR "Invalid TLSH_CHECKSUM value")
+endif()
 
 # setting TLSH_DISTANCE_PARAMETERS to 1 allows you to set command line arguments
 # to set - and hence experiment with the distance parameters
