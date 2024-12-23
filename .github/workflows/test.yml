@@ -16,6 +16,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
     - run: cmake -S. -B build -DTLSH_BUILD_WITH_ASAN=ON -DTLSH_BUILD_TESTS=ON -DTLSH_BUILD_BINDINGS=OFF
     - run: cmake --build ./build --config Release
     - run: ctest --progress --build-config Release --test-action test --test-dir ./build/src/tests
@@ -30,6 +32,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
     - uses: actions/setup-python@v5.1.0
       with:
         python-version: ${{ matrix.py }}
