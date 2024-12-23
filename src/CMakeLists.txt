@@ -70,10 +70,10 @@ install(TARGETS tlsh DESTINATION lib)
 
 install(
     FILES
-        ${TLSH_INC_DIR}/tlsh_impl.h
-        ${TLSH_INC_DIR}/tlsh_version.h
-        ${TLSH_INC_DIR}/tlsh_util.h
-        ${TLSH_INC_DIR}/tlsh.h
+        ${TLSH_INC_DIR}/tlsh/tlsh_impl.h
+        ${TLSH_INC_DIR}/tlsh/tlsh_version.h
+        ${TLSH_INC_DIR}/tlsh/tlsh_util.h
+        ${TLSH_INC_DIR}/tlsh/tlsh.h
     DESTINATION
         inc
 )
